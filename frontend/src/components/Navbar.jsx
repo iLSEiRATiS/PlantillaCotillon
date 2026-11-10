@@ -45,6 +45,11 @@ export default function AppNavbar() {
             <div className="d-flex align-items-center gap-3">
               {isLoggedIn ? (
                 <div className="d-flex align-items-center gap-2">
+                  {(user?.is_staff || user?.is_superuser) && (
+                    <Link to="/admin" className="btn-monochrome text-decoration-none py-2 px-3 small">
+                      Admin
+                    </Link>
+                  )}
                   <Link to="/pedidos" className="btn-monochrome-dark d-flex align-items-center gap-2 text-decoration-none py-2 px-3">
                     <FaUser size={13} />
                     <span className="small">{user?.username || 'Mi Cuenta'}</span>

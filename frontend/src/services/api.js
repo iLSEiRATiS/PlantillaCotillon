@@ -62,6 +62,17 @@ export const api = {
 
   // Contacto
   sendContact: (data) => request('/api/supplier-contacts', { method: 'POST', body: data }),
+
+  // Panel Administrativo
+  getAdminOverview: (token) => request('/api/admin/overview', { token }),
+  getAdminOrders: (token, status) =>
+    request(`/api/admin/orders${status ? `?status=${status}` : ''}`, { token }),
+  updateOrderStatus: (id, status, token) =>
+    request(`/api/admin/orders/${id}`, { method: 'PATCH', body: { status }, token }),
+  createProduct: (data, token) => request('/api/products', { method: 'POST', body: data, token }),
+  deleteProduct: (id, token) => request(`/api/products/${id}`, { method: 'DELETE', token }),
+  updateStoreConfig: (data, token) =>
+    request('/api/admin/store-config', { method: 'POST', body: data, token }),
 };
 
 export default api;

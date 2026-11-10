@@ -13,6 +13,8 @@ import Checkout from './pages/Checkout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Orders from './pages/Orders';
+import Admin from './pages/Admin';
+import './App.css';
 
 export default function App() {
   return (
@@ -34,6 +36,7 @@ export default function App() {
                 <Route path="/register" element={<Navigate to="/registro" replace />} />
                 <Route path="/pedidos" element={<Orders />} />
                 <Route path="/orders" element={<Navigate to="/pedidos" replace />} />
+                <Route path="/admin" element={<Admin />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>
