@@ -11,7 +11,11 @@ import {
   FaCreditCard, 
   FaMoneyBillWave, 
   FaStore,
-  FaCheck
+  FaCheck,
+  FaTag,
+  FaTimes,
+  FaPrint,
+  FaFileInvoiceDollar
 } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +33,11 @@ export default function Checkout() {
   const [minOrder, setMinOrder] = useState(15000);
   const [storeConfig, setStoreConfig] = useState(null);
   const [metodoPago, setMetodoPago] = useState('transferencia');
+
+  // Cupones de descuento
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -54,7 +63,6 @@ export default function Checkout() {
         if (config?.minOrderAmount) {
           setMinOrder(config.minOrderAmount);
         }
-        // Seleccionar método activo por defecto
         if (config?.transferEnabled) {
           setMetodoPago('transferencia');
         } else if (config?.mpEnabled) {
@@ -63,7 +71,7 @@ export default function Checkout() {
           setMetodoPago('efectivo');
         }
       } catch (e) {
-        // Fallback default
+        // Fallback
       }
     }
     loadConfig();
@@ -73,11 +81,48 @@ export default function Checkout() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // Cálculo de descuento por transferencia
+  // Cupones disponibles
+  const handleApplyCoupon = (e) => {
+    e.preventDefault();
+    setCouponError('');
+    const code = couponCode.trim().toUpperCase();
+    if (!code) return;
+
+    if (code === 'FIESTA10') {
+      setAppliedCoupon({ code: 'FIESTA10', pct: 10, desc: '10% de descuento en tu fiesta' });
+      setCouponCode('');
+    } else if (code === 'BIENVENIDA') {
+      setAppliedCoupon({ code: 'BIENVENIDA', pct: 15, desc: '15% de bienvenida' });
+      setCouponCode('');
+    } else if (code === 'COTILLON') {
+      setAppliedCoupon({ code: 'COTILLON', fixed: 2500, desc: '$ 2.500 de ahorro' });
+      setCouponCode('');
+    } else {
+      setCouponError('Cupón inválido o expirado. Probá con "FIESTA10" o "COTILLON"');
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError('');
+  };
+
+  // Descuento por cupón
+  let couponDiscountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.pct) {
+      couponDiscountAmount = Math.round((subtotal * appliedCoupon.pct) / 100);
+    } else if (appliedCoupon.fixed) {
+      couponDiscountAmount = Math.min(subtotal, appliedCoupon.fixed);
+    }
+  }
+
+  // Descuento por transferencia
   const transferDiscountPct = storeConfig?.transferEnabled ? (storeConfig.transferDiscount || 0) : 0;
   const isTransfer = metodoPago === 'transferencia';
-  const discountAmount = isTransfer ? (subtotal * transferDiscountPct) / 100 : 0;
-  const finalTotal = subtotal - discountAmount;
+  const subtotalAfterCoupon = Math.max(0, subtotal - couponDiscountAmount);
+  const transferDiscountAmount = isTransfer ? Math.round((subtotalAfterCoupon * transferDiscountPct) / 100) : 0;
+  const finalTotal = Math.max(0, subtotalAfterCoupon - transferDiscountAmount);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -106,10 +151,19 @@ export default function Checkout() {
           precio_unitario: it.price,
           atributos: it.attributes || {},
         })),
+        descuento_cupon: couponDiscountAmount,
+        cupon: appliedCoupon ? appliedCoupon.code : null,
       };
 
       const res = await api.createOrder(payload, token);
-      setOrderCreated({ ...res, metodoPagoSeleccionado: metodoPago, discountAmount });
+      setOrderCreated({
+        ...res,
+        metodoPagoSeleccionado: metodoPago,
+        transferDiscountAmount,
+        couponDiscountAmount,
+        appliedCoupon,
+        itemsPurchased: [...items],
+      });
       clearCart();
     } catch (err) {
       setError(err.message || 'Error al procesar el pedido. Por favor intenta nuevamente.');
@@ -125,8 +179,91 @@ export default function Checkout() {
 
     return (
       <Container className="py-5 text-center my-auto">
+        {/* COMPONENTE IMPRIMIBLE: REMITO / FACTURA */}
+        <div className="printable-remito d-none d-print-block text-start p-4 bg-white">
+          <div className="border-bottom pb-3 mb-3 d-flex justify-content-between align-items-center">
+            <div>
+              <h2 className="fw-bold mb-0" style={{ color: '#0f172a' }}>COTIFIESTA</h2>
+              <div className="small text-muted">Cotillón Mayorista &amp; Minorista • Fiestas &amp; Eventos</div>
+              <div className="small text-muted">Av. Corrientes 3450, Almagro, CABA • CUIT: 30-71234567-8</div>
+            </div>
+            <div className="text-end">
+              <div className="badge bg-dark fs-6 px-3 py-2 mb-1">REMITO DE ENTREGA</div>
+              <div className="fw-bold fs-5">Nº #0001-{String(orderCreated.id).padStart(6, '0')}</div>
+              <div className="small text-muted">Fecha: {new Date().toLocaleDateString('es-AR')}</div>
+            </div>
+          </div>
+
+          <div className="row mb-4">
+            <div className="col-6">
+              <h6 className="fw-bold text-uppercase small text-muted">Datos del Cliente:</h6>
+              <div><strong>Nombre:</strong> {orderCreated.nombre}</div>
+              <div><strong>Email:</strong> {orderCreated.email}</div>
+              <div><strong>Teléfono:</strong> {orderCreated.telefono || 'Sin especificar'}</div>
+              <div><strong>DNI / CUIT:</strong> {orderCreated.destinatario_documento || 'Consumidor Final'}</div>
+            </div>
+            <div className="col-6">
+              <h6 className="fw-bold text-uppercase small text-muted">Destino de Entrega:</h6>
+              <div><strong>Dirección:</strong> {orderCreated.direccion}</div>
+              <div><strong>Ciudad / CP:</strong> {orderCreated.ciudad} ({orderCreated.cp})</div>
+              <div><strong>Forma de Pago:</strong> {orderCreated.metodoPagoSeleccionado?.toUpperCase()}</div>
+            </div>
+          </div>
+
+          <table className="table table-bordered mb-4">
+            <thead className="table-light">
+              <tr>
+                <th>Cant.</th>
+                <th>Descripción del Artículo</th>
+                <th className="text-end">Precio Unit.</th>
+                <th className="text-end">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(orderCreated.itemsPurchased || []).map((it, idx) => (
+                <tr key={idx}>
+                  <td>{it.quantity} u.</td>
+                  <td>{it.name}</td>
+                  <td className="text-end">{formatMoney(it.price)}</td>
+                  <td className="text-end">{formatMoney(it.price * it.quantity)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              {orderCreated.couponDiscountAmount > 0 && (
+                <tr>
+                  <td colSpan="3" className="text-end">Descuento Cupón ({orderCreated.appliedCoupon?.code}):</td>
+                  <td className="text-end text-success">-{formatMoney(orderCreated.couponDiscountAmount)}</td>
+                </tr>
+              )}
+              {orderCreated.transferDiscountAmount > 0 && (
+                <tr>
+                  <td colSpan="3" className="text-end">Descuento Transferencia:</td>
+                  <td className="text-end text-success">-{formatMoney(orderCreated.transferDiscountAmount)}</td>
+                </tr>
+              )}
+              <tr>
+                <td colSpan="3" className="text-end fw-bold fs-6">TOTAL FINAL:</td>
+                <td className="text-end fw-bold fs-6">{formatMoney(orderCreated.total)}</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          <div className="border-top pt-4 mt-5 d-flex justify-content-between align-items-end">
+            <div className="small text-muted" style={{ maxWidth: '350px' }}>
+              Comprobante no válido como factura comercial tipo A o B oficial. Para solicitar factura A con CUIT, enviar constancia por WhatsApp.
+            </div>
+            <div className="text-center" style={{ minWidth: '220px' }}>
+              <div className="border-top border-dark pt-1" style={{ width: '180px', margin: '0 auto' }}>
+                Firma y Aclaración Receptor
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* VISTA EN PANTALLA: CONFIRMACIÓN EXITOSA */}
         <div
-          className="p-4 p-md-5 rounded-4 mx-auto"
+          className="p-4 p-md-5 rounded-4 mx-auto d-print-none"
           style={{
             maxWidth: '680px',
             backgroundColor: '#ffffff',
@@ -158,7 +295,7 @@ export default function Checkout() {
                 <FaMoneyBillWave /> Datos para Realizar la Transferencia (¡{transferDiscountPct}% OFF Aplicado!):
               </h6>
               <div className="small mb-2" style={{ color: '#065f46' }}>
-                Realiza la transferencia por <strong>{formatMoney(orderCreated.total)}</strong> a la siguiente cuenta bancaria:
+                Realizá la transferencia por <strong>{formatMoney(orderCreated.total)}</strong> a la siguiente cuenta bancaria:
               </div>
               <div className="p-3 rounded-2 bg-white border small" style={{ color: '#1e293b' }}>
                 <div><strong>Banco:</strong> {storeConfig.transferBank}</div>
@@ -168,7 +305,7 @@ export default function Checkout() {
                 <div><strong>CUIT:</strong> {storeConfig.transferCuit}</div>
               </div>
               <small className="text-muted d-block mt-2">
-                Envíanos tu comprobante por WhatsApp al 11 5555-0000 o responde al email con el # de orden.
+                Envianos tu comprobante por WhatsApp al 11 5555-0000 o respondé al email con el número de orden #{orderCreated.id}.
               </small>
             </div>
           )}
@@ -193,10 +330,10 @@ export default function Checkout() {
               style={{ backgroundColor: '#fef3c7', border: '1.5px solid #fde68a' }}
             >
               <h6 className="fw-bold text-warning mb-2 d-flex align-items-center gap-2" style={{ color: '#b45309' }}>
-                <FaStore /> Retiro y Pago en Depósito
+                <FaStore /> Retiro y Pago en Depósito Central
               </h6>
               <p className="small mb-0" style={{ color: '#78350f' }}>
-                {storeConfig?.cashInstructions || 'Puedes abonar en efectivo al retirar en Av. Corrientes 3450, Almagro.'}
+                {storeConfig?.cashInstructions || 'Podés abonar en efectivo al retirar en Av. Corrientes 3450, Almagro.'}
               </p>
             </div>
           )}
@@ -210,7 +347,15 @@ export default function Checkout() {
             <div><strong>Estado:</strong> <span className="badge bg-warning text-dark">A procesar</span></div>
           </div>
 
-          <div className="d-flex justify-content-center gap-3">
+          {/* BOTONES DE ACCIÓN: IMPRIMIR REMITO + NAVEGACIÓN */}
+          <div className="d-flex flex-wrap justify-content-center gap-3">
+            <Button
+              variant="outline-dark"
+              className="px-4 py-2 d-inline-flex align-items-center gap-2 fw-semibold"
+              onClick={() => window.print()}
+            >
+              <FaPrint /> Imprimir Remito / Comprobante
+            </Button>
             <Button as={Link} to="/catalogo" className="btn-festive px-4 py-2">
               Volver al Catálogo
             </Button>
@@ -263,170 +408,183 @@ export default function Checkout() {
             as={Link}
             to="/catalogo"
             variant="link"
-            className="p-0 text-decoration-none small d-inline-flex align-items-center gap-2 mb-2"
-            style={{ color: '#64748b', fontWeight: 600 }}
+            className="text-secondary p-0 text-decoration-none small d-inline-flex align-items-center gap-2 fw-bold"
           >
             <FaArrowLeft size={12} /> Seguir comprando en el catálogo
           </Button>
-          <h1 className="h2 fw-bold mt-1 mb-1" style={{ color: '#0f172a' }}>
-            Finalizar Compra
+          <h1 className="h2 fw-bold mt-2" style={{ color: '#0f172a' }}>
+            Finalizar Compra de Cotillón
           </h1>
-          <p className="small mb-0" style={{ color: '#64748b' }}>
-            Ingresa los datos para la entrega y elige tu método de pago preferido.
+          <p className="text-secondary small mb-0">
+            Completá tus datos de entrega y seleccioná tu medio de pago favorito.
           </p>
         </div>
 
-        {error && <Alert variant="danger" className="py-2 small mb-4">{error}</Alert>}
+        {error && (
+          <Alert variant="danger" dismissible onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
 
         <Row className="g-5">
-          {/* Formulario */}
+          {/* Formulario de Checkout */}
           <Col lg={7}>
             <div
-              className="p-4 p-md-5 rounded-4 mb-4"
+              className="p-4 p-md-5 rounded-4"
               style={{
                 backgroundColor: '#ffffff',
                 border: '1.5px solid #e2e8f0',
                 boxShadow: 'var(--shadow-card)',
               }}
             >
-              <h5 className="fw-bold mb-3 d-flex align-items-center gap-2" style={{ color: '#0f172a' }}>
-                <FaTruck className="text-danger" /> 1. Datos del Destinatario y Envío
-              </h5>
               <Form onSubmit={handleSubmit}>
-                <Row className="g-3 mb-3">
-                  <Col sm={6}>
-                    <Form.Label className="small fw-bold" style={{ color: '#334155' }}>
-                      Nombre y Apellido *
-                    </Form.Label>
-                    <Form.Control
-                      className="form-control-custom"
-                      required
-                      name="nombre"
-                      value={form.nombre}
-                      onChange={handleChange}
-                      placeholder="Ej: Laura Martínez"
-                    />
+                <h5 className="fw-bold mb-3 d-flex align-items-center gap-2" style={{ color: '#0f172a' }}>
+                  <FaTruck className="text-danger" /> 1. Datos del Destinatario y Envío
+                </h5>
+
+                <Row className="g-3 mb-4">
+                  <Col md={12}>
+                    <Form.Group>
+                      <Form.Label className="small fw-bold">Nombre Completo o Razón Social *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="nombre"
+                        required
+                        value={form.nombre}
+                        onChange={handleChange}
+                        className="form-control-custom"
+                        placeholder="Ej: Sofía Pérez"
+                      />
+                    </Form.Group>
                   </Col>
-                  <Col sm={6}>
-                    <Form.Label className="small fw-bold" style={{ color: '#334155' }}>
-                      Email de Contacto *
-                    </Form.Label>
-                    <Form.Control
-                      type="email"
-                      className="form-control-custom"
-                      required
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      placeholder="laura@ejemplo.com"
-                    />
+
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label className="small fw-bold">Correo Electrónico *</Form.Label>
+                      <Form.Control
+                        type="email"
+                        name="email"
+                        required
+                        value={form.email}
+                        onChange={handleChange}
+                        className="form-control-custom"
+                        placeholder="tu@email.com"
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label className="small fw-bold">Teléfono / WhatsApp *</Form.Label>
+                      <Form.Control
+                        type="tel"
+                        name="telefono"
+                        required
+                        value={form.telefono}
+                        onChange={handleChange}
+                        className="form-control-custom"
+                        placeholder="11 5555 1234"
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={12}>
+                    <Form.Group>
+                      <Form.Label className="small fw-bold">Dirección de Entrega *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="direccion"
+                        required
+                        value={form.direccion}
+                        onChange={handleChange}
+                        className="form-control-custom"
+                        placeholder="Calle, número, piso, depto"
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={5}>
+                    <Form.Group>
+                      <Form.Label className="small fw-bold">Ciudad / Localidad *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="ciudad"
+                        required
+                        value={form.ciudad}
+                        onChange={handleChange}
+                        className="form-control-custom"
+                        placeholder="Ej: Rosario, CABA..."
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={4}>
+                    <Form.Group>
+                      <Form.Label className="small fw-bold">Provincia *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="estado"
+                        required
+                        value={form.estado}
+                        onChange={handleChange}
+                        className="form-control-custom"
+                        placeholder="Buenos Aires, Córdoba..."
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={3}>
+                    <Form.Group>
+                      <Form.Label className="small fw-bold">Código Postal *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="cp"
+                        required
+                        value={form.cp}
+                        onChange={handleChange}
+                        className="form-control-custom"
+                        placeholder="1414"
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={12}>
+                    <Form.Group>
+                      <Form.Label className="small fw-bold">DNI o CUIT (para Factura / Envío)</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="destinatario_documento"
+                        value={form.destinatario_documento}
+                        onChange={handleChange}
+                        className="form-control-custom"
+                        placeholder="Número de documento para el despacho"
+                      />
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={12}>
+                    <Form.Group>
+                      <Form.Label className="small fw-bold">Notas o Aclaraciones del Pedido</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        name="nota"
+                        value={form.nota}
+                        onChange={handleChange}
+                        className="form-control-custom"
+                        placeholder="¿Entre calles, horario de entrega preferido o detalles del evento?"
+                      />
+                    </Form.Group>
                   </Col>
                 </Row>
 
-                <Row className="g-3 mb-3">
-                  <Col sm={6}>
-                    <Form.Label className="small fw-bold" style={{ color: '#334155' }}>
-                      Teléfono / WhatsApp *
-                    </Form.Label>
-                    <Form.Control
-                      className="form-control-custom"
-                      required
-                      name="telefono"
-                      value={form.telefono}
-                      onChange={handleChange}
-                      placeholder="+54 9 11 1234-5678"
-                    />
-                  </Col>
-                  <Col sm={6}>
-                    <Form.Label className="small fw-bold" style={{ color: '#334155' }}>
-                      DNI / CUIT (Facturación)
-                    </Form.Label>
-                    <Form.Control
-                      className="form-control-custom"
-                      name="destinatario_documento"
-                      value={form.destinatario_documento}
-                      onChange={handleChange}
-                      placeholder="Número de documento"
-                    />
-                  </Col>
-                </Row>
-
-                <div className="mb-3">
-                  <Form.Label className="small fw-bold" style={{ color: '#334155' }}>
-                    Dirección de Entrega *
-                  </Form.Label>
-                  <Form.Control
-                    className="form-control-custom"
-                    required
-                    name="direccion"
-                    value={form.direccion}
-                    onChange={handleChange}
-                    placeholder="Calle, altura, piso, departamento"
-                  />
-                </div>
-
-                <Row className="g-3 mb-3">
-                  <Col sm={5}>
-                    <Form.Label className="small fw-bold" style={{ color: '#334155' }}>
-                      Ciudad / Localidad *
-                    </Form.Label>
-                    <Form.Control
-                      className="form-control-custom"
-                      required
-                      name="ciudad"
-                      value={form.ciudad}
-                      onChange={handleChange}
-                      placeholder="Ej: Rosario"
-                    />
-                  </Col>
-                  <Col sm={4}>
-                    <Form.Label className="small fw-bold" style={{ color: '#334155' }}>
-                      Provincia *
-                    </Form.Label>
-                    <Form.Control
-                      className="form-control-custom"
-                      name="estado"
-                      value={form.estado}
-                      onChange={handleChange}
-                      placeholder="Santa Fe"
-                    />
-                  </Col>
-                  <Col sm={3}>
-                    <Form.Label className="small fw-bold" style={{ color: '#334155' }}>
-                      C. Postal
-                    </Form.Label>
-                    <Form.Control
-                      className="form-control-custom"
-                      name="cp"
-                      value={form.cp}
-                      onChange={handleChange}
-                      placeholder="S2000"
-                    />
-                  </Col>
-                </Row>
-
-                <div className="mb-4">
-                  <Form.Label className="small fw-bold" style={{ color: '#334155' }}>
-                    Nota o Aclaraciones (Opcional)
-                  </Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={2}
-                    className="form-control-custom"
-                    name="nota"
-                    value={form.nota}
-                    onChange={handleChange}
-                    placeholder="Ej: Horario de entrega preferido, retiro en depósito..."
-                  />
-                </div>
-
-                {/* 2. FORMA DE PAGO */}
+                {/* Medio de Pago */}
                 <h5 className="fw-bold mb-3 d-flex align-items-center gap-2 pt-3 border-top" style={{ color: '#0f172a' }}>
                   <FaCreditCard className="text-primary" /> 2. Método de Pago
                 </h5>
 
                 <div className="d-flex flex-column gap-3 mb-4">
-                  {/* Transferencia */}
+                  {/* Transferencia Bancaria */}
                   {storeConfig?.transferEnabled !== false && (
                     <div
                       className={`p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer ${
@@ -439,18 +597,20 @@ export default function Checkout() {
                         <Form.Check
                           type="radio"
                           name="paymentRadio"
-                          id="pay-transf"
+                          id="pay-transfer"
                           checked={metodoPago === 'transferencia'}
                           onChange={() => setMetodoPago('transferencia')}
                         />
                         <div>
-                          <div className="fw-bold" style={{ color: '#0f172a' }}>
-                            Transferencia Bancaria Directa
+                          <div className="fw-bold d-flex align-items-center gap-2" style={{ color: '#0f172a' }}>
+                            <span>Transferencia Bancaria Directa</span>
                             {transferDiscountPct > 0 && (
-                              <Badge bg="success" className="ms-2">¡{transferDiscountPct}% OFF!</Badge>
+                              <Badge bg="success" className="fw-bold">
+                                ¡{transferDiscountPct}% OFF!
+                              </Badge>
                             )}
                           </div>
-                          <small className="text-muted">CBU / Alias inmediato sin comisiones adicionales.</small>
+                          <small className="text-muted">Aboná con CBU o Alias bancario y ahorrá en tu pedido.</small>
                         </div>
                       </div>
                       <FaMoneyBillWave size={22} className="text-success" />
@@ -458,7 +618,7 @@ export default function Checkout() {
                   )}
 
                   {/* Mercado Pago */}
-                  {storeConfig?.mpEnabled && (
+                  {storeConfig?.mpEnabled !== false && (
                     <div
                       className={`p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer ${
                         metodoPago === 'mercadopago' ? 'border-primary bg-light' : 'bg-white'
@@ -476,10 +636,10 @@ export default function Checkout() {
                         />
                         <div>
                           <div className="fw-bold" style={{ color: '#0f172a' }}>
-                            Mercado Pago (Tarjetas & Dinero en Cuenta)
+                            Mercado Pago (Tarjetas de Crédito / Débito)
                           </div>
                           <small className="text-muted">
-                            Visa, Mastercard, Cabal, Débito en hasta {storeConfig?.mpInstallments || 3} cuotas.
+                            Visa, Mastercard, Débito en hasta {storeConfig?.mpInstallments || 3} cuotas.
                           </small>
                         </div>
                       </div>
@@ -508,7 +668,7 @@ export default function Checkout() {
                           <div className="fw-bold" style={{ color: '#0f172a' }}>
                             Efectivo al Retirar en Depósito Central
                           </div>
-                          <small className="text-muted">Abona al retirar tu pedido sin cargo de flete.</small>
+                          <small className="text-muted">Aboná al retirar tu pedido sin cargo de flete.</small>
                         </div>
                       </div>
                       <FaStore size={22} className="text-warning" />
@@ -533,7 +693,7 @@ export default function Checkout() {
             </div>
           </Col>
 
-          {/* Resumen lateral */}
+          {/* Resumen lateral con Cuponera */}
           <Col lg={5}>
             <div
               className="p-4 rounded-4 position-sticky"
@@ -548,7 +708,7 @@ export default function Checkout() {
                 Resumen de la Orden
               </h5>
 
-              <div className="d-flex flex-column gap-3 mb-4 overflow-auto pe-1" style={{ maxHeight: '280px' }}>
+              <div className="d-flex flex-column gap-3 mb-4 overflow-auto pe-1" style={{ maxHeight: '250px' }}>
                 {items.map((it) => (
                   <div
                     key={it.id}
@@ -573,15 +733,62 @@ export default function Checkout() {
                 ))}
               </div>
 
+              {/* ===================================================
+                  SISTEMA DE CUPÓN DE DESCUENTO
+                  =================================================== */}
+              <div className="p-3 rounded-3 bg-light border mb-3">
+                <div className="d-flex align-items-center gap-1 small fw-bold text-dark mb-1">
+                  <FaTag className="text-danger" /> ¿Tenés un cupón promocional?
+                </div>
+                {!appliedCoupon ? (
+                  <div className="d-flex gap-2">
+                    <Form.Control
+                      size="sm"
+                      type="text"
+                      placeholder="Ej: FIESTA10"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      className="bg-white"
+                    />
+                    <Button size="sm" variant="dark" onClick={handleApplyCoupon}>
+                      Aplicar
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="d-flex align-items-center justify-content-between p-2 rounded bg-success-subtle text-success small border border-success-subtle">
+                    <span>
+                      ¡Cupón <strong>{appliedCoupon.code}</strong> aplicado! ({appliedCoupon.desc})
+                    </span>
+                    <button
+                      type="button"
+                      className="btn btn-link p-0 text-danger"
+                      onClick={handleRemoveCoupon}
+                      title="Quitar cupón"
+                    >
+                      <FaTimes size={12} />
+                    </button>
+                  </div>
+                )}
+                {couponError && <div className="text-danger small mt-1">{couponError}</div>}
+              </div>
+
+              {/* Totales y Descuentos */}
               <div className="d-flex justify-content-between align-items-center mb-2">
                 <span className="small" style={{ color: '#64748b' }}>Subtotal Artículos</span>
                 <span className="fw-bold" style={{ color: '#0f172a' }}>{formatMoney(subtotal)}</span>
               </div>
 
-              {isTransfer && discountAmount > 0 && (
+              {couponDiscountAmount > 0 && (
+                <div className="d-flex justify-content-between align-items-center mb-2 text-success">
+                  <span className="small fw-bold">Descuento Cupón ({appliedCoupon?.code})</span>
+                  <span className="fw-bold">-{formatMoney(couponDiscountAmount)}</span>
+                </div>
+              )}
+
+              {isTransfer && transferDiscountAmount > 0 && (
                 <div className="d-flex justify-content-between align-items-center mb-2 text-success">
                   <span className="small fw-bold">Descuento Transferencia ({transferDiscountPct}%)</span>
-                  <span className="fw-bold">-{formatMoney(discountAmount)}</span>
+                  <span className="fw-bold">-{formatMoney(transferDiscountAmount)}</span>
                 </div>
               )}
 
@@ -598,15 +805,19 @@ export default function Checkout() {
               </div>
 
               {subtotal < minOrder && (
-                <Alert variant="warning" className="small py-2 mb-0">
-                  El monto mínimo es de {formatMoney(minOrder)}. Agrega {formatMoney(minOrder - subtotal)} más para confirmar tu compra.
+                <Alert variant="warning" className="small py-2 mb-3">
+                  El monto mínimo de compra mayorista es de {formatMoney(minOrder)}. Te faltan {formatMoney(minOrder - subtotal)}.
                 </Alert>
               )}
 
-              <div className="mt-3 p-3 rounded-3" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                <div className="d-flex align-items-center gap-2 small text-muted">
+              <div className="p-3 rounded-3 bg-light border small text-muted d-flex flex-column gap-2">
+                <div className="d-flex align-items-center gap-2">
                   <FaShieldAlt className="text-success" />
-                  <span>Compra protegida y confirmación inmediata con comprobante digital.</span>
+                  <span>Tu pago y datos están protegidos con encriptación SSL de 256 bits.</span>
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                  <FaCheckCircle className="text-primary" />
+                  <span>Comprobante de compra y remito oficial al finalizar.</span>
                 </div>
               </div>
             </div>

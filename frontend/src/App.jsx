@@ -4,6 +4,7 @@ import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
+import FloatingWhatsApp from './components/FloatingWhatsApp';
 
 import Home from './pages/Home';
 import Catalogo from './pages/Catalogo';
@@ -41,6 +42,7 @@ export default function App() {
               </Routes>
             </main>
             <CartDrawer />
+            <FloatingWhatsApp />
             <Footer />
           </div>
         </CartProvider>

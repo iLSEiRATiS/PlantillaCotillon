@@ -1164,3 +1164,189 @@ a:hover {
   cursor: not-allowed;
   color: #999999;
 }
+
+/* =======================================================
+   NAVBAR BUSCADOR INTERACTIVO
+   ======================================================= */
+.navbar-search-container {
+  max-width: 520px;
+}
+
+.navbar-search-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 2px 4px 2px 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-search-wrapper:focus-within {
+  border-color: #e11d48;
+  box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+}
+
+.navbar-search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-size: 0.88rem;
+  color: #0f172a;
+}
+
+.navbar-search-input::placeholder {
+  color: #94a3b8;
+  font-size: 0.84rem;
+}
+
+.navbar-search-clear {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-search-clear:hover {
+  color: #e11d48;
+}
+
+.navbar-search-btn {
+  background-color: #e11d48;
+  border: none;
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.navbar-search-btn:hover {
+  background-color: #be123c;
+}
+
+/* =======================================================
+   BOTÓN FLOTANTE DE WHATSAPP
+   ======================================================= */
+.floating-whatsapp-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.floating-whatsapp-tooltip {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  max-width: 240px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+  animation: bounceIn 0.4s ease;
+}
+
+@keyframes bounceIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.floating-whatsapp-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #25d366;
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45);
+  transition: all 0.25s ease;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.floating-whatsapp-btn:hover {
+  background-color: #1eb856;
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 12px 28px rgba(37, 211, 102, 0.6);
+  color: #ffffff !important;
+}
+
+/* =======================================================
+   GALERÍA DE MINIATURAS EN DETALLE DE PRODUCTO
+   ======================================================= */
+.product-thumb-btn {
+  width: 68px;
+  height: 68px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 4px;
+  background-color: #ffffff;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.product-thumb-btn:hover {
+  border-color: #94a3b8;
+}
+
+.product-thumb-btn.active {
+  border-color: #e11d48;
+  box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2);
+}
+
+.product-thumb-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* =======================================================
+   ESTILOS DE IMPRESIÓN (REMITO / FACTURA)
+   ======================================================= */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt;
+  }
+
+  .announcement-bar,
+  .app-navbar,
+  .app-footer,
+  .floating-whatsapp-container,
+  .d-print-none,
+  button,
+  .btn {
+    display: none !important;
+  }
+
+  .printable-remito {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .table {
+    border-color: #000000 !important;
+  }
+}
+
