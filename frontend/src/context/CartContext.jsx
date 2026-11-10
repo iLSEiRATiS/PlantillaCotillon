@@ -1,0 +1,157 @@
+// src/context/CartContext.jsx
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { useAuth } from './AuthContext';
+
+const CartCtx = createContext(null);
+
+export function CartProvider({ children }) {
+  const { token, user, loading } = useAuth();
+  const [cartItems, setCartItems] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('cart_items') || '[]'); } catch { return []; }
+  });
+  const [cartNotice, setCartNotice] = useState(null);
+
+  const userKey = user?.id || user?._id || user?.pk || null;
+
+  const persist = (items) => {
+    setCartItems(items);
+    localStorage.setItem('cart_items', JSON.stringify(items));
+    if (userKey) localStorage.setItem(`cart_items_${userKey}`, JSON.stringify(items));
+  };
+
+  // Cuando el usuario cambia, cargamos su carrito guardado; si no hay usuario, vaciamos el carrito visible.
+  useEffect(() => {
+    if (userKey) {
+      try {
+        const stored = localStorage.getItem(`cart_items_${userKey}`);
+        if (stored) {
+          setCartItems(JSON.parse(stored));
+          return;
+        }
+      } catch { /* ignore */ }
+      try {
+        const fallback = localStorage.getItem('cart_items');
+        setCartItems(fallback ? JSON.parse(fallback) : []);
+      } catch {
+        setCartItems([]);
+      }
+    } else if (!token && !loading) {
+      setCartItems([]);
+      localStorage.setItem('cart_items', '[]');
+    }
+  }, [userKey, token, loading]);
+
+  const findIndex = (id) => cartItems.findIndex(i => String(i.id || i._id) === String(id));
+
+  const buildAttributesKey = (attrs = {}) => {
+    const entries = Object.entries(attrs || {})
+      .map(([k, v]) => {
+        const val = Array.isArray(v) ? v.join(',') : v;
+        return `${k}:${val}`;
+      })
+      .sort();
+    return entries.join('|');
+  };
+
+  const canBuy = !loading;
+
+  const addToCart = (product, qty = 1, attributes = {}) => {
+    const cantidad = Math.max(1, Number(qty) || 1);
+    const resolvedProductId =
+      product.productId ||
+      product.sourceProductId ||
+      product.realProductId ||
+      product._realProductId ||
+      product.id ||
+      product._id;
+    const baseId = product.id || product._id || `${product.categoria}-${product.nombre}`;
+    const attrsKey = buildAttributesKey(attributes);
+    const id = attrsKey ? `${baseId}::${attrsKey}` : baseId;
+    const idx = findIndex(id);
+    if (idx >= 0) {
+      const copy = [...cartItems];
+      copy[idx] = { ...copy[idx], cantidad: (copy[idx].cantidad || 1) + cantidad };
+      persist(copy);
+    } else {
+      persist([...cartItems, {
+        id,
+        productId: String(resolvedProductId || baseId),
+        nombre: product.nombre || product.name || 'Producto',
+        precio: Number(product.precio ?? product.price ?? 0),
+        imagen: product.imagen || '',
+        cantidad,
+        atributos: attributes
+      }]);
+    }
+    setCartNotice({
+      id: Date.now(),
+      tone: 'success',
+      title: 'Agregado al carrito',
+      productName: product.nombre || product.name || 'Producto',
+      message: 'El producto se cargo satisfactoriamente.',
+    });
+  };
+
+  const dismissCartNotice = () => setCartNotice(null);
+
+  const removeFromCart = (id) => {
+    const removedItem = cartItems.find(it => String(it.id) === String(id));
+    persist(cartItems.filter(it => String(it.id) !== String(id)));
+    if (removedItem) {
+      setCartNotice({
+        id: Date.now(),
+        tone: 'danger',
+        title: 'Eliminado del carrito',
+        productName: removedItem.nombre || 'Producto',
+        message: 'El producto se elimino satisfactoriamente.',
+      });
+    }
+  };
+
+  const clearCart = () => persist([]);
+
+  const updateQuantity = (id, cantidad) => {
+    const idx = findIndex(id);
+    if (idx < 0) return;
+    const qty = Math.max(1, Number(cantidad) || 1);
+    const copy = [...cartItems];
+    copy[idx] = { ...copy[idx], cantidad: qty };
+    persist(copy);
+  };
+
+  const increaseQuantity = (id) => updateQuantity(id, (cartItems[findIndex(id)]?.cantidad || 1) + 1);
+
+  const decreaseQuantity = (id) => updateQuantity(id, Math.max(1, (cartItems[findIndex(id)]?.cantidad || 1) - 1));
+
+  const setQuantity = (id, qty) => updateQuantity(id, qty);
+
+  const getTotalItems = () =>
+    cartItems.reduce((acc, it) => acc + (it.cantidad || 1), 0);
+
+  const getTotalPrice = () =>
+    cartItems.reduce((acc, it) => acc + Number(it.precio ?? it.price ?? 0) * (it.cantidad || 1), 0);
+
+  const value = useMemo(() => ({
+    cartItems,
+    addToCart,
+    removeFromCart,
+    clearCart,
+    updateQuantity,
+    increaseQuantity,
+    decreaseQuantity,
+    setQuantity,
+    getTotalItems,
+    getTotalPrice,
+    canBuy,
+    cartNotice,
+    dismissCartNotice,
+  }), [cartItems, canBuy, cartNotice]);
+
+  return <CartCtx.Provider value={value}>{children}</CartCtx.Provider>;
+}
+
+export function useCart() {
+  const ctx = useContext(CartCtx);
+  if (!ctx) throw new Error('useCart debe usarse dentro de <CartProvider>');
+  return ctx;
+}

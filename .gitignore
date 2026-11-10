@@ -1,0 +1,26 @@
+# Dependencias
+node_modules/
+*/node_modules/
+
+# Entornos y secretos
+.env
+.env.local
+*.env
+
+# Base de datos local SQLite y backups
+*.db
+*.db-journal
+*.sqlite3
+backend/dev.db
+backend/dev.db-journal
+
+# Compilación y logs
+dist/
+build/
+*.log
+npm-debug.log*
+
+# IDE y sistema
+.DS_Store
+.idea/
+.vscode/

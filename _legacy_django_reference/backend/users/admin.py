@@ -1,0 +1,240 @@
+from django.contrib import admin
+from django.contrib import messages
+from django.contrib.admin.sites import NotRegistered
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import Group
+from django.shortcuts import redirect
+from django.template.response import TemplateResponse
+from django.urls import path, reverse
+from rest_framework.authtoken.models import Token, TokenProxy
+
+from .forms import AdminCustomUserCreationForm
+from .models import CustomUser, GlobalStoreSettings
+from .user_importer import USER_IMPORT_HEADERS, USER_SAMPLE_ROWS, UserXlsxImporter
+
+
+for model in (Token, TokenProxy, Group):
+    try:
+        admin.site.unregister(model)
+    except NotRegistered:
+        pass
+
+
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    model = CustomUser
+    add_form = AdminCustomUserCreationForm
+    list_display = ("name", "email", "phone", "role", "approval_status", "is_staff", "is_active", "date_joined")
+    list_filter = ("role", "approval_status", "is_staff", "is_superuser", "is_active")
+    search_fields = ("name", "first_name", "last_name")
+    ordering = ("-date_joined",)
+    actions = ("approve_users", "reject_users", "set_role_operator", "set_role_admin", "set_role_user", "add_staff", "remove_staff", "reset_password_default")
+    fieldsets = (
+        (None, {"fields": ("username",)}),
+        ("Datos personales", {"fields": ("first_name", "last_name", "email", "name", "phone", "address", "city", "zip_code", "avatar")}),
+        ("Estado de aprobacion", {"fields": ("approval_status",)}),
+        ("Presupuesto de envio", {"fields": ("shipping_quote_amount", "shipping_quote_note", "shipping_quote_updated_at")}),
+        ("Permisos", {"fields": ("role", "is_active", "is_staff", "is_superuser")}),
+        ("Fechas importantes", {"fields": ("last_login", "date_joined", "welcome_email_sent_at", "last_password_changed_at")}),
+    )
+    readonly_fields = ("shipping_quote_updated_at", "welcome_email_sent_at", "last_password_changed_at", "last_login", "date_joined")
+    filter_horizontal = ()
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("first_name", "last_name", "email", "password1", "password2", "approval_status"),
+            },
+        ),
+    )
+    change_list_template = "admin/users/customuser/change_list.html"
+    template_xlsx_path = None
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path(
+                "importar-xlsx/",
+                self.admin_site.admin_view(self.import_xlsx_view),
+                name="users_customuser_import_xlsx",
+            ),
+        ]
+        # Filter out the default password change url to prevent manual access
+        urls = [url for url in urls if getattr(url, "name", "") != "users_customuser_password_change"]
+        return custom + urls
+
+    def has_module_permission(self, request):
+        if hasattr(request.user, "role") and request.user.role == "operator":
+            return False
+        return super().has_module_permission(request)
+
+    def has_view_permission(self, request, obj=None):
+        if hasattr(request.user, "role") and request.user.role == "operator":
+            return False
+        return super().has_view_permission(request, obj)
+
+    def has_change_permission(self, request, obj=None):
+        if hasattr(request.user, "role") and request.user.role == "operator":
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_add_permission(self, request):
+        if hasattr(request.user, "role") and request.user.role == "operator":
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        if hasattr(request.user, "role") and request.user.role == "operator":
+            return False
+        return super().has_delete_permission(request, obj)
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        if obj and 'password' in form.base_fields:
+            # Quitamos el campo de contraseña en la vista de edición para evitar que se muestre el widget
+            del form.base_fields['password']
+        return form
+
+    def save_model(self, request, obj, form, change):
+        if obj.first_name or obj.last_name:
+            obj.name = " ".join(part for part in [str(obj.first_name or "").strip(), str(obj.last_name or "").strip()] if part).strip()
+        if obj.email:
+            obj.username = str(obj.email).strip().lower()
+        super().save_model(request, obj, form, change)
+
+    def import_xlsx_view(self, request):
+        importer = UserXlsxImporter(template_xlsx_path=self.template_xlsx_path)
+
+        if request.method == "GET" and request.GET.get("sample"):
+            return importer.export_workbook(USER_SAMPLE_ROWS, "clientes_ejemplo.xlsx")
+
+        if request.method == "GET" and request.GET.get("template"):
+            return importer.export_template_response()
+
+        created = 0
+        updated = 0
+        errors = []
+
+        if request.method == "POST":
+            upload = request.FILES.get("file")
+            if not upload:
+                messages.error(request, "Selecciona un archivo XLSX.")
+                return redirect(reverse("admin:users_customuser_import_xlsx"))
+            try:
+                created, updated, errors = importer.import_upload(upload)
+                if created or updated:
+                    messages.success(
+                        request,
+                        f"Importacion completada. Nuevos: {created} | Actualizados: {updated}",
+                    )
+                for err in errors:
+                    messages.error(request, err)
+            except Exception as exc:  # pragma: no cover
+                messages.error(request, f"No se pudo procesar el XLSX: {exc}")
+                return redirect(reverse("admin:users_customuser_import_xlsx"))
+
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "title": "Importar clientes via XLSX",
+            "headers": USER_IMPORT_HEADERS,
+            "example_url": f"{reverse('admin:users_customuser_import_xlsx')}?sample=1",
+            "template_url": f"{reverse('admin:users_customuser_import_xlsx')}?template=1",
+            "created": created,
+            "updated": updated,
+            "errors": errors,
+        }
+        return TemplateResponse(request, "admin/users_import.html", context)
+
+
+
+    @admin.action(description="Aprobar usuarios seleccionados")
+    def approve_users(self, request, queryset):
+        for user in queryset:
+            user.set_approval_status("approved")
+            user.save(update_fields=["approval_status", "is_active", "role"])
+
+    @admin.action(description="Rechazar usuarios seleccionados")
+    def reject_users(self, request, queryset):
+        for user in queryset:
+            user.set_approval_status("rejected")
+            user.save(update_fields=["approval_status", "is_active", "role"])
+
+    @admin.action(description="Asignar rol: Operador")
+    def set_role_operator(self, request, queryset):
+        for user in queryset:
+            user.role = "operator"
+            user.save()
+        messages.success(request, f"Se asignó el rol Operador a {queryset.count()} usuario(s).")
+
+    @admin.action(description="Asignar rol: Administrador")
+    def set_role_admin(self, request, queryset):
+        for user in queryset:
+            user.role = "admin"
+            user.save()
+        messages.success(request, f"Se asignó el rol Administrador a {queryset.count()} usuario(s).")
+
+    @admin.action(description="Asignar rol: Usuario normal")
+    def set_role_user(self, request, queryset):
+        for user in queryset:
+            user.role = "user"
+            user.save()
+        messages.success(request, f"Se asignó el rol Usuario normal a {queryset.count()} usuario(s).")
+
+    @admin.action(description="Añadir staff")
+    def add_staff(self, request, queryset):
+        for user in queryset:
+            user.is_staff = True
+            user.save(update_fields=["is_staff", "approval_status", "is_active", "role"])
+
+    @admin.action(description="Quitar staff")
+    def remove_staff(self, request, queryset):
+        for user in queryset:
+            user.is_staff = False
+            user.role = "user"
+            user.approval_status = "approved"
+            user.is_active = True
+            user.save(update_fields=["is_staff", "approval_status", "is_active", "role"])
+
+    @admin.action(description="Restablecer clave por defecto (Abcd1234)")
+    def reset_password_default(self, request, queryset):
+        for user in queryset:
+            user.set_password("Abcd1234")
+            user.must_change_password = True
+            user.save(update_fields=["password", "must_change_password"])
+        messages.success(request, f"Se restableció la clave por defecto de {queryset.count()} usuario(s).")
+
+@admin.register(GlobalStoreSettings)
+class GlobalStoreSettingsAdmin(admin.ModelAdmin):
+    list_display = ("min_order_amount", "maintenance_mode", "mostrar_precios_invitados", "actualizado_en")
+    list_editable = ("maintenance_mode", "mostrar_precios_invitados",)
+    list_display_links = ("min_order_amount",)
+    fieldsets = (
+        (
+            "Modo mantenimiento",
+            {
+                "fields": ("maintenance_mode", "maintenance_title", "maintenance_message"),
+                "description": "Al activarlo, los clientes ven una pantalla de mantenimiento. Las sesiones existentes no se cierran y el equipo interno puede continuar ingresando.",
+            },
+        ),
+        ("Compra", {"fields": ("min_order_amount", "mostrar_precios_invitados")}),
+    )
+
+    def has_module_permission(self, request):
+        if hasattr(request.user, "role") and request.user.role == "operator":
+            return False
+        return super().has_module_permission(request)
+
+    def has_view_permission(self, request, obj=None):
+        if hasattr(request.user, "role") and request.user.role == "operator":
+            return False
+        return super().has_view_permission(request, obj)
+
+    def has_add_permission(self, request):
+        if GlobalStoreSettings.objects.exists():
+            return False
+        return super().has_add_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        return False

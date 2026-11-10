@@ -1,0 +1,122 @@
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.utils import timezone
+from products.models import StoreSettings
+
+
+class CustomUser(AbstractUser):
+    ROLE_CHOICES = (
+        ("user", "Usuario"),
+        ("operator", "Operador"),
+        ("admin", "Administrador"),
+    )
+    APPROVAL_CHOICES = (
+        ("pending", "Pendiente"),
+        ("approved", "Aprobado"),
+        ("rejected", "Rechazado"),
+    )
+    name = models.CharField("nombre", max_length=150, blank=True, default="")
+    phone = models.CharField("telefono", max_length=50, blank=True, default="")
+    document_number = models.CharField("dni/cuil", max_length=40, blank=True, default="")
+    address = models.CharField("direccion", max_length=255, blank=True, default="")
+    city = models.CharField("ciudad", max_length=120, blank=True, default="")
+    zip_code = models.CharField("codigo postal", max_length=20, blank=True, default="")
+    avatar = models.ImageField("avatar", upload_to="avatars/", blank=True, null=True)
+    role = models.CharField("rol", max_length=10, choices=ROLE_CHOICES, default="user")
+    approval_status = models.CharField("estado de aprobacion", max_length=10, choices=APPROVAL_CHOICES, default="pending")
+    welcome_email_sent_at = models.DateTimeField("bienvenida enviada el", null=True, blank=True)
+    last_password_changed_at = models.DateTimeField("ultima clave cambiada el", null=True, blank=True)
+    must_change_password = models.BooleanField("debe cambiar clave", default=False)
+    shipping_quote_amount = models.DecimalField("presupuesto de envio", max_digits=12, decimal_places=2, null=True, blank=True)
+    shipping_quote_note = models.TextField("detalle de envio", blank=True, default="")
+    shipping_quote_updated_at = models.DateTimeField("presupuesto de envio actualizado el", null=True, blank=True)
+    groups = models.ManyToManyField(
+        "auth.Group",
+        related_name="customuser_set",
+        blank=True,
+        help_text="Grupos de permisos heredados."
+    )
+    user_permissions = models.ManyToManyField(
+        "auth.Permission",
+        related_name="customuser_set",
+        blank=True,
+        help_text="Permisos específicos para el usuario."
+    )
+
+    class Meta:
+        verbose_name = "Usuario"
+        verbose_name_plural = "Usuarios"
+
+    def get_full_name_parts(self):
+        first = str(self.first_name or "").strip()
+        last = str(self.last_name or "").strip()
+        return first, last
+
+    def get_display_name(self):
+        first, last = self.get_full_name_parts()
+        full = " ".join(part for part in [first, last] if part).strip()
+        if full:
+            return full
+        return str(self.name or self.username or self.email or "user").strip()
+
+    def get_missing_profile_fields(self):
+        missing = []
+        if not str(self.first_name or "").strip():
+            missing.append("first_name")
+        if not str(self.last_name or "").strip():
+            missing.append("last_name")
+        if not str(self.document_number or "").strip():
+            missing.append("document_number")
+        return missing
+
+    def _should_be_admin(self):
+        return self.role == "admin" or (self.is_superuser and self.role != "operator")
+
+    def _sync_access_flags(self):
+        if self.role == "operator":
+            self.is_superuser = False
+            self.is_staff = True
+            self.approval_status = "approved"
+        elif self._should_be_admin():
+            self.role = "admin"
+            self.is_staff = True
+            self.approval_status = "approved"
+        elif self.role == "user":
+            self.is_superuser = False
+            self.is_staff = False
+            
+        self.is_active = self.approval_status == "approved"
+
+    def set_approval_status(self, status):
+        self.approval_status = status
+        self._sync_access_flags()
+
+    def save(self, *args, **kwargs):
+        self._sync_access_flags()
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return self.username or self.email or "user"
+
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(CustomUser, verbose_name="usuario", on_delete=models.CASCADE, related_name="password_reset_tokens")
+    token_hash = models.CharField("hash del token", max_length=64, unique=True, db_index=True)
+    expires_at = models.DateTimeField("vence el")
+    used_at = models.DateTimeField("usado el", null=True, blank=True)
+    created_at = models.DateTimeField("creado el", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Token de restablecimiento"
+        verbose_name_plural = "Tokens de restablecimiento"
+
+    @property
+    def is_active(self):
+        return self.used_at is None and self.expires_at > timezone.now()
+
+class GlobalStoreSettings(StoreSettings):
+    class Meta:
+        proxy = True
+        verbose_name = "Configuración de Tienda"
+        verbose_name_plural = "Configuraciones de Tienda"

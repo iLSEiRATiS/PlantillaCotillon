@@ -1,0 +1,251 @@
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.utils import timezone
+from django.utils.text import slugify
+
+
+class Category(models.Model):
+    nombre = models.CharField(max_length=150)
+    slug = models.SlugField(max_length=110, blank=True)
+    descripcion = models.TextField(blank=True)
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="children",
+    )
+
+    class Meta:
+        ordering = ["nombre"]
+        verbose_name = "Categoria"
+        verbose_name_plural = "Categorias"
+
+    def clean(self):
+        parent = self.parent
+        if not parent:
+            return
+
+        if self.pk and parent.pk == self.pk:
+            raise ValidationError({"parent": "Una categoria no puede ser hija de si misma."})
+
+        ancestor = parent
+        while ancestor is not None:
+            if self.pk and ancestor.pk == self.pk:
+                raise ValidationError({"parent": "Una categoria no puede ser hija de una descendiente propia."})
+            ancestor = ancestor.parent
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.nombre)
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.nombre
+
+
+class Product(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="products")
+    categoria = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
+    sku = models.CharField(max_length=100, blank=True, default="")
+    nombre = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=120, unique=True, blank=True)
+    precio = models.DecimalField(max_digits=10, decimal_places=2)
+    descripcion = models.TextField(blank=True)
+    imagen = models.ImageField(upload_to="products/", blank=True, null=True)
+    image_url = models.URLField(max_length=500, blank=True, default="")
+    video_url = models.URLField(max_length=500, blank=True, default="")
+    atributos = models.JSONField(default=dict, blank=True)
+    atributos_stock = models.JSONField(default=dict, blank=True)
+    atributos_precio = models.JSONField(default=dict, blank=True)
+    atributos_sin_stock = models.JSONField(default=dict, blank=True)
+    stock = models.PositiveIntegerField(default=0)
+    sin_stock = models.BooleanField(default=False)
+    activo = models.BooleanField(default=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-creado_en"]
+        verbose_name = "Producto"
+        verbose_name_plural = "Productos"
+
+    def __str__(self) -> str:
+        details = []
+        if self.categoria_id:
+            details.append(str(self.categoria))
+        if self.precio is not None:
+            details.append(f"${self.precio}")
+        return f"{self.nombre} - {' - '.join(details)}" if details else self.nombre
+
+    def save(self, *args, **kwargs):
+        if not self.slug and self.nombre:
+            base = slugify(self.nombre)[:110]
+            candidate = base
+            counter = 1
+            while Product.objects.filter(slug=candidate).exclude(pk=self.pk).exists():
+                counter += 1
+                candidate = f"{base}-{counter}"
+            self.slug = candidate
+        super().save(*args, **kwargs)
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="extra_images")
+    image = models.ImageField(upload_to="products/gallery/", blank=True, null=True)
+    image_url = models.URLField(max_length=500, blank=True, default="")
+    order = models.PositiveIntegerField(default=0)
+    activo = models.BooleanField(default=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["order", "id"]
+        verbose_name = "Imagen de producto"
+        verbose_name_plural = "Imagenes de producto"
+
+    def __str__(self):
+        return f"{self.product_id} - {self.order}"
+
+
+class Offer(models.Model):
+    nombre = models.CharField(max_length=120)
+    slug = models.SlugField(max_length=140, unique=True, blank=True)
+    descripcion = models.TextField(blank=True)
+    porcentaje = models.DecimalField(max_digits=5, decimal_places=2, help_text="Ej: 10.00 para 10%")
+    precio_oferta = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    producto = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, blank=True, related_name="ofertas")
+    categoria = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True, related_name="ofertas")
+    activo = models.BooleanField(default=True)
+    empieza = models.DateTimeField(null=True, blank=True)
+    termina = models.DateTimeField(null=True, blank=True)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-creado_en"]
+        verbose_name = "Oferta"
+        verbose_name_plural = "Ofertas"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.nombre)[:130]
+        super().save(*args, **kwargs)
+
+    @property
+    def esta_activa(self):
+        if not self.activo:
+            return False
+        now = timezone.now()
+        if self.empieza and now < self.empieza:
+            return False
+        if self.termina and now > self.termina:
+            return False
+        return True
+
+
+class HomeImage(models.Model):
+    SECTION_CHOICES = [
+        ("hero", "Hero"),
+        ("category_tile", "Explora por categoria"),
+        ("featured_collection", "Colecciones destacadas"),
+    ]
+
+    key = models.SlugField(max_length=80, unique=True)
+    section = models.CharField(max_length=20, choices=SECTION_CHOICES)
+    title = models.CharField(max_length=120, blank=True)
+    image_url = models.URLField()
+    target_url = models.CharField(max_length=255, blank=True, default="")
+    order = models.PositiveIntegerField(default=0)
+    activo = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["section", "order", "id"]
+        verbose_name = "Imagen Home"
+        verbose_name_plural = "Imagenes Home"
+
+    def __str__(self):
+        return f"{self.section}: {self.title or self.key}"
+
+
+class HomeMarquee(models.Model):
+    text = models.CharField(max_length=255, blank=True, default="")
+    text_color = models.CharField(max_length=7, default="#ffffff")
+    background_color = models.CharField(max_length=7, default="#dc3545")
+    activo = models.BooleanField(default=False)
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Franja Home"
+        verbose_name_plural = "Franjas Home"
+
+    def __str__(self):
+        return self.text or "Franja Home"
+
+
+class StoreSettings(models.Model):
+    min_order_amount = models.DecimalField(
+        "monto minimo de compra",
+        max_digits=12,
+        decimal_places=2,
+        default=100000,
+        help_text="Monto minimo requerido para permitir compras.",
+    )
+    mostrar_precios_invitados = models.BooleanField(
+        "Mostrar precios a invitados",
+        default=True,
+        help_text="Si está activo, los usuarios sin iniciar sesión podrán ver los precios de los productos."
+    )
+    maintenance_mode = models.BooleanField(
+        "Modo mantenimiento activo",
+        default=False,
+        help_text="Bloquea la tienda para clientes e invitados sin cerrar sus sesiones. El equipo interno conserva el acceso.",
+    )
+    maintenance_title = models.CharField(
+        "Titulo de mantenimiento",
+        max_length=120,
+        default="Estamos en mantenimiento",
+        blank=True,
+    )
+    maintenance_message = models.TextField(
+        "Mensaje de mantenimiento",
+        default="Disculpa las molestias. Estamos realizando mejoras y volveremos pronto.",
+        blank=True,
+    )
+    actualizado_en = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Configuracion de tienda"
+        verbose_name_plural = "Configuracion de tienda"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        return
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(pk=1, defaults={"min_order_amount": 100000})
+        return obj
+
+    def __str__(self):
+        return "Configuracion de tienda"
+
+
+class SupplierContact(models.Model):
+    nombre = models.CharField(max_length=120)
+    apellido = models.CharField(max_length=120)
+    telefono = models.CharField(max_length=40)
+    mensaje = models.TextField()
+    archivo = models.FileField(upload_to="supplier_contacts/files/", blank=True, null=True)
+    revisado = models.BooleanField(default=False)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-creado_en"]
+        verbose_name = "Contacto de proveedor"
+        verbose_name_plural = "Contactos de proveedores"
+
+    def __str__(self):
+        return f"{self.nombre} {self.apellido}".strip()

@@ -1,0 +1,102 @@
+from django.conf import settings
+from django.db import models
+from django.utils import timezone
+from decimal import Decimal
+
+from products.models import Product
+
+
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ("created", "A procesar"),
+        ("review", "A revisar"),
+        ("shipped", "A entregar"),
+        ("paid", "Pagado"),
+        ("approved", "Aprobado"),
+        ("pending_payment", "Falta pago"),
+        ("draft", "Borrador"),
+        ("delivered", "Entregado"),
+        ("cancelled", "Cancelado"),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="orders")
+    nombre = models.CharField(max_length=120)
+    email = models.EmailField()
+    direccion = models.CharField(max_length=255)
+    ciudad = models.CharField(max_length=120)
+    estado = models.CharField(max_length=120, blank=True)
+    cp = models.CharField(max_length=20, blank=True)
+    telefono = models.CharField(max_length=50, blank=True)
+    destinatario_documento = models.CharField(max_length=40, blank=True, default="")
+    nota = models.TextField(blank=True)
+    remitente_nombre = models.CharField(max_length=150, blank=True, default="")
+    remitente_email = models.EmailField(blank=True, default="")
+    remitente_telefono = models.CharField(max_length=50, blank=True, default="")
+    remitente_documento = models.CharField(max_length=40, blank=True, default="")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="created")
+    envio = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    creado_en = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-creado_en"]
+        verbose_name = "Pedido a procesar"
+        verbose_name_plural = "Pedidos a procesar"
+
+    def __str__(self):
+        return f"Pedido #{self.id or ''} - {self.nombre}"
+
+    def recalc_total(self):
+        total = sum(item.subtotal for item in self.items.all()) + (self.envio or Decimal("0.00"))
+        self.total = total
+        self.save(update_fields=["total"])
+
+
+class ReviewOrder(Order):
+    class Meta:
+        proxy = True
+        verbose_name = "Pedido a revisar"
+        verbose_name_plural = "Pedidos a revisar"
+
+
+class PendingDeliveryOrder(Order):
+    class Meta:
+        proxy = True
+        verbose_name = "Pedido a entregar"
+        verbose_name_plural = "Pedidos a entregar"
+
+
+class PaidOrder(Order):
+    class Meta:
+        proxy = True
+        verbose_name = "Pedido pagado"
+        verbose_name_plural = "Pedidos pagados"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.PROTECT,
+        related_name="order_items",
+        null=True,
+        blank=True,
+    )
+    product_name = models.CharField(max_length=255, blank=True, default="")
+    cantidad = models.PositiveIntegerField(default=1)
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+    atributos = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        verbose_name = "Item de pedido"
+        verbose_name_plural = "Items de pedido"
+        ordering = ["product__categoria__nombre", "product__nombre"]
+
+    @property
+    def subtotal(self):
+        if self.precio_unitario is None:
+            return Decimal("0.00")
+        return self.precio_unitario * (self.cantidad or 0)
+
+    def __str__(self):
+        return f"{self.product_name or self.product or 'Producto manual'} x{self.cantidad}"

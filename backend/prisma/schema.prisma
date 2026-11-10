@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  username    String    @unique
+  password    String
+  firstName   String?   @default("")
+  lastName    String?   @default("")
+  isStaff     Boolean   @default(false)
+  isSuperuser Boolean   @default(false)
+  orders      Order[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Category {
+  id          Int        @id @default(autoincrement())
+  nombre      String
+  slug        String     @unique
+  descripcion String?    @default("")
+  parentId    Int?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[] @relation("CategoryHierarchy")
+  products    Product[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  nombre      String
+  slug        String      @unique
+  sku         String?     @default("")
+  precio      Float       @default(0.0)
+  descripcion String?     @default("")
+  imageUrl    String?     @default("")
+  videoUrl    String?     @default("")
+  atributos   String?     @default("{}") // JSON string for attributes/variants
+  stock       Int         @default(100)
+  sinStock    Boolean     @default(false)
+  activo      Boolean     @default(true)
+  categoriaId Int?
+  categoria   Category?   @relation(fields: [categoriaId], references: [id], onDelete: SetNull)
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Order {
+  id                    Int         @id @default(autoincrement())
+  nombre                String
+  email                 String
+  direccion             String
+  ciudad                String
+  estado                String?     @default("")
+  cp                    String?     @default("")
+  telefono              String?     @default("")
+  destinatarioDocumento String?     @default("")
+  nota                  String?     @default("")
+  status                String      @default("created") // created, review, shipped, paid, delivered, cancelled
+  envio                 Float       @default(0.0)
+  total                 Float       @default(0.0)
+  userId                Int?
+  user                  User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items                 OrderItem[]
+  creadoEn              DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+}
+
+model OrderItem {
+  id             Int      @id @default(autoincrement())
+  orderId        Int
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      Int?
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName    String   @default("")
+  cantidad       Int      @default(1)
+  precioUnitario Float    @default(0.0)
+  atributos      String?  @default("{}")
+}
+
+model StoreSettings {
+  id                 Int      @id @default(1)
+  minOrderAmount     Float    @default(10000.0)
+  showPricesToGuests Boolean  @default(true)
+  maintenanceMode    Boolean  @default(false)
+  maintenanceTitle   String   @default("Estamos en mantenimiento")
+  maintenanceMessage String   @default("Volveremos en breve con novedades y nuevos productos.")
+  updatedAt          DateTime @updatedAt
+}
+
+model SupplierContact {
+  id        Int      @id @default(autoincrement())
+  nombre    String
+  apellido  String
+  telefono  String
+  mensaje   String
+  creadoEn  DateTime @default(now())
+}

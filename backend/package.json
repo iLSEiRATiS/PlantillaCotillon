@@ -1,0 +1,33 @@
+{
+  "name": "plantilla-cotillon-backend",
+  "version": "1.0.0",
+  "description": "Backend API REST nativo en Node.js y Express con Prisma ORM para PlantillaCotillón",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node prisma/seed.js",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:vps": "prisma db push --schema=prisma/schema.postgresql.prisma"
+  },
+  "keywords": [
+    "cotillon",
+    "ecommerce",
+    "express",
+    "node",
+    "prisma"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.4",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "prisma": "^6.19.3"
+  }
+}

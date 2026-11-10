@@ -1,0 +1,121 @@
+// src/components/Footer.jsx
+import { useEffect, useState } from 'react';
+import { Container, Row, Col } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import { FaInstagram, FaEnvelope, FaPhoneAlt, FaArrowUp } from 'react-icons/fa';
+
+const Footer = () => {
+  const year = new Date().getFullYear();
+  const [showTop, setShowTop] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 200);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  return (
+    <>
+      <footer className="footer-modern text-white mt-4 pt-4" role="contentinfo">
+        <Container>
+          <Row className="gy-4 align-items-start footer-main-grid">
+            <Col md={5}>
+              <div className="footer-brand footer-panel">
+                <h5 className="mb-2 text-white fw-bold">PlantillaCotillón</h5>
+                <p className="mb-0 text-white-50 small">
+                  Plantilla de comercio electrónico para cotillón, repostería y ambientación de eventos.
+                  Paleta monocromática moderna, alto rendimiento y arquitectura desacoplada React + Node.js.
+                </p>
+                <div className="mt-3 d-flex gap-3">
+                  <Link to="/productos" className="link-light small text-decoration-none">Catálogo</Link>
+                  <span className="text-muted">•</span>
+                  <Link to="/como-comprar" className="link-light small text-decoration-none">Cómo Comprar</Link>
+                </div>
+              </div>
+            </Col>
+
+            <Col md={4}>
+              <div className="footer-panel">
+              <h6 className="text-uppercase fw-semibold small mb-3 text-white-50">Contacto</h6>
+              <ul className="list-unstyled mb-0 small footer-contact">
+                <li className="d-flex align-items-center">
+                  <span className="footer-icon" aria-hidden>
+                    <FaEnvelope />
+                  </span>
+                  <a
+                    href="mailto:ventascotistore@gmail.com"
+                    className="link-light text-decoration-none"
+                  >
+                    ventascotistore@gmail.com
+                  </a>
+                </li>
+                <li className="d-flex align-items-center mt-2">
+                  <span className="footer-icon" aria-hidden>
+                    <FaPhoneAlt />
+                  </span>
+                  <a href="tel:+541150443472" className="link-light text-decoration-none">
+                    11 5044-3472
+                  </a>
+                </li>
+              </ul>
+              </div>
+            </Col>
+
+            <Col md={3}>
+              <div className="footer-panel">
+              <h6 className="text-uppercase fw-semibold small mb-3 text-white-50">Seguinos</h6>
+              <div className="d-flex flex-column gap-2">
+                <a
+                  href="https://www.instagram.com/cotistore_mayorista"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-social footer-social-icon"
+                  aria-label="Instagram de CotiStore (se abre en una pestaña nueva)"
+                >
+                  <span className="footer-icon" aria-hidden>
+                    <FaInstagram />
+                  </span>
+                </a>
+              </div>
+              </div>
+            </Col>
+          </Row>
+
+          <div className="footer-divider" />
+
+          <div className="footer-legal-wrap pb-2">
+            <small className="text-white-50 footer-legal-copy">
+              © {year} PlantillaCotillón — Todos los derechos reservados.
+            </small>
+            <div className="footer-legal-links">
+              <Link to="/terminos-y-condiciones" className="footer-legal-link">
+                Términos y condiciones
+              </Link>
+              <Link to="/privacidad" className="footer-legal-link">
+                Privacidad
+              </Link>
+            </div>
+          </div>
+        </Container>
+      </footer>
+
+      {showTop && (
+        <button
+          type="button"
+          onClick={scrollTop}
+          aria-label="Subir al inicio"
+          className="btn btn-primary shadow position-fixed"
+          style={{ right: 16, bottom: 16, borderRadius: '9999px', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1050 }}
+        >
+          <FaArrowUp />
+        </button>
+      )}
+    </>
+  );
+};
+
+export default Footer;
+
