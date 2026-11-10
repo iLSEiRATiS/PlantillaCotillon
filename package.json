@@ -1,9 +1,10 @@
 {
   "name": "plantilla-cotillon",
   "version": "1.0.0",
-  "description": "Plantilla monocromática de ecommerce de cotillón con React (Vite) y Node.js (Express + Prisma)",
+  "description": "Plantilla festiva de cotillón con React (Vite) y Node.js (Express + Prisma)",
   "private": true,
   "scripts": {
+    "dev": "echo 'Elige qué servidor correr: \"npm run dev:frontend\" (puerto 5173) o \"npm run dev:backend\" (puerto 8000)'",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "seed": "cd backend && npm run seed",
