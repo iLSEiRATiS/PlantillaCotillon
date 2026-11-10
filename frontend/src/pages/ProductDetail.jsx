@@ -181,15 +181,18 @@ export default function ProductDetail() {
         </div>
 
         {/* Tarjeta Principal de Producto */}
-        <div className="p-4 p-lg-5 rounded-4 bg-white border shadow-sm mb-5">
-          <Row className="g-5 align-items-start">
+        <div className="p-3 p-sm-4 p-lg-5 rounded-4 bg-white border shadow-sm mb-5">
+          <Row className="g-4 g-lg-5 align-items-start">
             {/* Columna Izquierda: Galería de Fotos */}
             <Col lg={6}>
               <div className="d-flex flex-column gap-3">
                 {/* Imagen Principal */}
-                <div className="rounded-3 border overflow-hidden bg-white p-3 text-center position-relative" style={{ minHeight: '380px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div
+                  className="rounded-3 border overflow-hidden bg-white p-2 p-sm-3 text-center position-relative"
+                  style={{ minHeight: '260px', maxHeight: '420px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
                   {discountPercent > 0 && (
-                    <span className="badge bg-danger position-absolute top-0 start-0 m-3 px-2 py-1 fw-bold">
+                    <span className="badge bg-danger position-absolute top-0 start-0 m-2 m-sm-3 px-2 py-1 fw-bold">
                       {discountPercent}% OFF
                     </span>
                   )}
@@ -206,12 +209,12 @@ export default function ProductDetail() {
                 </div>
 
                 {/* Miniaturas de la Galería */}
-                <div className="d-flex gap-2 justify-content-center">
+                <div className="d-flex gap-2 justify-content-start justify-content-sm-center overflow-x-auto pb-2">
                   {gallery.map((imgUrl, idx) => (
                     <button
                       key={idx}
                       type="button"
-                      className={`product-thumb-btn ${selectedImg === imgUrl ? 'active' : ''}`}
+                      className={`product-thumb-btn flex-shrink-0 ${selectedImg === imgUrl ? 'active' : ''}`}
                       onClick={() => setSelectedImg(imgUrl)}
                     >
                       <img src={imgUrl} alt={`Vista ${idx + 1}`} />
@@ -351,17 +354,17 @@ export default function ProductDetail() {
                     <FaTruck className="text-primary" />
                     <span className="fw-bold small text-dark">Calculá el costo y tiempo de envío</span>
                   </div>
-                  <form onSubmit={handleCalculateShipping} className="d-flex gap-2">
+                  <form onSubmit={handleCalculateShipping} className="d-flex flex-column flex-sm-row gap-2">
                     <Form.Control
                       type="text"
                       placeholder="Tu Código Postal (ej: 1414)"
                       value={postalCode}
                       maxLength={8}
                       onChange={(e) => setPostalCode(e.target.value)}
-                      className="form-control-sm bg-white"
+                      className="form-control-sm bg-white flex-grow-1"
                       style={{ maxWidth: '240px' }}
                     />
-                    <Button type="submit" size="sm" variant="dark" disabled={calcLoading}>
+                    <Button type="submit" size="sm" variant="dark" disabled={calcLoading} className="px-3">
                       {calcLoading ? 'Calculando...' : 'Calcular'}
                     </Button>
                   </form>
@@ -418,7 +421,7 @@ export default function ProductDetail() {
         {/* ===================================================
             SECCIÓN DE OPINIONES Y RESEÑAS DE CLIENTES
             =================================================== */}
-        <div className="p-4 p-lg-5 rounded-4 bg-white border shadow-sm mb-5">
+        <div className="p-3 p-sm-4 p-lg-5 rounded-4 bg-white border shadow-sm mb-5">
           <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
             <div>
               <span className="text-danger small text-uppercase fw-bold tracking-wider">Testimonios Reales</span>
@@ -492,7 +495,7 @@ export default function ProductDetail() {
             =================================================== */}
         {relatedProducts.length > 0 && (
           <div className="mb-5">
-            <div className="d-flex align-items-center justify-content-between mb-4">
+            <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
               <div>
                 <span className="text-danger small text-uppercase fw-bold tracking-wider">Combiná tu Festejo</span>
                 <h2 className="h4 fw-bold mb-0" style={{ color: '#0f172a' }}>Artículos sugeridos para esta fiesta</h2>
@@ -502,9 +505,9 @@ export default function ProductDetail() {
               </Link>
             </div>
 
-            <Row className="g-3">
+            <Row className="g-2 g-sm-3">
               {relatedProducts.map((relProd) => (
-                <Col xl={3} lg={3} sm={6} key={relProd.id}>
+                <Col xl={3} lg={3} sm={6} xs={6} key={relProd.id}>
                   <ProductCard product={relProd} layout="grid" />
                 </Col>
               ))}

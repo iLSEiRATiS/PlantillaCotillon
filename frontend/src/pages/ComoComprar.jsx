@@ -91,7 +91,7 @@ export default function ComoComprar() {
 
         {/* CTA Catálogo */}
         <div
-          className="p-5 rounded-4 text-center mb-5 position-relative"
+          className="p-4 p-sm-5 rounded-4 text-center mb-5 position-relative"
           style={{
             background: 'linear-gradient(135deg, #fff1f2 0%, #e0e7ff 50%, #fef3c7 100%)',
             border: '1.5px solid #fecdd3',

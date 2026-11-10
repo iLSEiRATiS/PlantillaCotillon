@@ -430,7 +430,7 @@ export default function Checkout() {
           {/* Formulario de Checkout */}
           <Col lg={7}>
             <div
-              className="p-4 p-md-5 rounded-4"
+              className="p-3 p-sm-4 p-md-5 rounded-4"
               style={{
                 backgroundColor: '#ffffff',
                 border: '1.5px solid #e2e8f0',
@@ -695,15 +695,7 @@ export default function Checkout() {
 
           {/* Resumen lateral con Cuponera */}
           <Col lg={5}>
-            <div
-              className="p-4 rounded-4 position-sticky"
-              style={{
-                top: '100px',
-                backgroundColor: '#ffffff',
-                border: '1.5px solid #e2e8f0',
-                boxShadow: 'var(--shadow-card)',
-              }}
-            >
+            <div className="checkout-summary-box p-3 p-sm-4 rounded-4">
               <h5 className="fw-bold mb-3" style={{ color: '#0f172a' }}>
                 Resumen de la Orden
               </h5>

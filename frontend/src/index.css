@@ -408,7 +408,8 @@ a:hover {
   background-color: #ffffff !important;
   color: #0f172a !important;
   border-left: 1px solid #e2e8f0 !important;
-  width: 460px !important;
+  width: 440px !important;
+  max-width: 100vw !important;
   box-shadow: -15px 0 35px rgba(0, 0, 0, 0.1) !important;
 }
 
@@ -1374,4 +1375,236 @@ a:hover {
     border-color: #000000 !important;
   }
 }
+
+/* =======================================================
+   RESPONSIVE DESIGN SYSTEM - TODOS LOS DISPOSITIVOS
+   Móvil, Tablet, Laptop y Pantallas Grandes
+   ======================================================= */
+
+/* --- TABLETS & PANTALLAS MEDIANAS (< 992px) --- */
+@media (max-width: 991.98px) {
+  .app-navbar {
+    padding: 0.5rem 0;
+  }
+
+  .navbar-search-container {
+    max-width: 100% !important;
+    margin: 0.4rem 0 0.2rem;
+  }
+
+  .brand-logo-img {
+    height: 40px;
+  }
+
+  .checkout-summary-box {
+    position: static !important;
+    top: auto !important;
+    margin-top: 2rem;
+  }
+}
+
+/* --- DISPOSITIVOS MÓVILES (< 768px) --- */
+@media (max-width: 767.98px) {
+  body {
+    font-size: 0.93rem;
+  }
+
+  .hero-banner {
+    padding: 2.75rem 0 2.25rem;
+  }
+
+  .display-4 {
+    font-size: 2.1rem !important;
+    letter-spacing: -0.02em;
+  }
+
+  .display-5 {
+    font-size: 1.85rem !important;
+  }
+
+  .display-6 {
+    font-size: 1.5rem !important;
+  }
+
+  .announcement-bar {
+    font-size: 0.74rem;
+    padding: 0.35rem 0.5rem;
+  }
+
+  /* Catálogo Mercado Libre */
+  .ml-catalog-page {
+    padding: 1rem 0 2.5rem;
+  }
+
+  .ml-controls-bar {
+    padding: 0.65rem 0.85rem;
+  }
+
+  .ml-query-title {
+    font-size: 1.35rem;
+  }
+
+  /* Paginación más compacta */
+  .ml-pagination-bar {
+    gap: 0.25rem;
+    margin-top: 1.75rem;
+  }
+
+  .ml-page-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 0.5rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* --- MÓVILES PEQUEÑOS (< 576px) --- */
+@media (max-width: 575.98px) {
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .display-4 {
+    font-size: 1.75rem !important;
+  }
+
+  .lead {
+    font-size: 0.95rem !important;
+  }
+
+  /* Drawer al 100% en teléfonos */
+  .custom-drawer {
+    width: 100vw !important;
+  }
+
+  .custom-drawer .offcanvas-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .custom-drawer .offcanvas-body {
+    padding: 1.25rem 1rem !important;
+  }
+
+  /* WhatsApp Flotante Móvil */
+  .floating-whatsapp-container {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .floating-whatsapp-btn {
+    width: 50px;
+    height: 50px;
+  }
+
+  .floating-whatsapp-btn svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .floating-whatsapp-tooltip {
+    max-width: 210px;
+    padding: 8px 10px;
+    font-size: 0.72rem;
+  }
+
+  /* Mercado Libre Cards en Grilla 2x2 en Móviles */
+  .ml-card-img-container {
+    padding: 0.65rem;
+  }
+
+  .ml-card-content {
+    padding: 0.65rem;
+  }
+
+  .ml-price-strike {
+    font-size: 0.6875rem;
+    height: 13px;
+  }
+
+  .ml-price-amount {
+    font-size: 1.2rem;
+  }
+
+  .ml-discount-badge {
+    font-size: 0.75rem;
+  }
+
+  .ml-installments-text {
+    font-size: 0.72rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ml-shipping-text {
+    font-size: 0.72rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .ml-product-title {
+    font-size: 0.78rem;
+    height: 32px;
+    line-height: 1.3;
+    margin-bottom: 0.35rem;
+  }
+
+  .ml-btn-add {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  /* Mercado Libre Cards en Lista en Móviles */
+  .ml-card-list {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.85rem;
+    gap: 0.75rem;
+  }
+
+  .ml-card-list-img {
+    width: 100%;
+    height: 130px;
+    min-width: auto;
+  }
+
+  .ml-card-list-pricing {
+    width: 100%;
+    min-width: auto;
+    text-align: left;
+    align-items: flex-start;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 0.65rem;
+    margin-top: 0.25rem;
+  }
+
+  .ml-card-list-pricing .ml-price-main-row {
+    justify-content: flex-start !important;
+  }
+
+  .ml-card-list-pricing .ml-btn-add {
+    width: 100%;
+  }
+
+  /* Badges de Confianza del Footer en Móvil */
+  .footer-trust-badge {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.75rem;
+    gap: 0.45rem;
+  }
+
+  .footer-trust-badge svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .footer-trust-badge div div:first-child {
+    font-size: 0.78rem;
+  }
+
+  .footer-trust-badge div div:last-child {
+    font-size: 0.7rem !important;
+  }
+}
+
 

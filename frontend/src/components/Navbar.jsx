@@ -40,27 +40,61 @@ export default function AppNavbar() {
     <>
       {/* Barra de anuncio festiva */}
       <div className="announcement-bar d-flex align-items-center justify-content-center">
-        <FaStar size={11} className="text-warning me-2" />
-        <span>¡Bienvenidos a <strong>CotiFiesta</strong>! • Envíos a todo el país • Atención WhatsApp: 11 5555-0000</span>
+        <FaStar size={11} className="text-warning me-2 flex-shrink-0" />
+        <span className="text-truncate">
+          ¡Bienvenidos a <strong>CotiFiesta</strong>! • Envíos a todo el país • Atención WhatsApp: 11 5555-0000
+        </span>
       </div>
 
       <Navbar expand="lg" className="app-navbar py-2" variant="light">
         <Container>
-          {/* Logo */}
-          <Navbar.Brand as={Link} to="/" className="d-flex align-items-center me-3">
-            <img src={logo} alt="CotiFiesta" className="brand-logo-img" />
-          </Navbar.Brand>
+          {/* Top Row en Mobile: Logo a la izquierda, Carrito + Menú a la derecha */}
+          <div className="d-flex align-items-center justify-content-between w-100 d-lg-contents">
+            {/* Logo */}
+            <Navbar.Brand as={Link} to="/" className="d-flex align-items-center me-2 me-lg-3 py-0">
+              <img src={logo} alt="CotiFiesta" className="brand-logo-img" />
+            </Navbar.Brand>
 
-          {/* Buscador Interactivo Centrado */}
+            {/* Acciones Rápidas en Móvil (Visible solo en < 992px) */}
+            <div className="d-flex align-items-center gap-2 d-lg-none">
+              <Button
+                variant="link"
+                className="position-relative text-dark p-2 text-decoration-none d-flex align-items-center justify-content-center"
+                onClick={openCart}
+                aria-label="Abrir carrito de compras"
+              >
+                <FaShoppingBag size={21} className="text-dark" />
+                {totalItems > 0 && (
+                  <Badge
+                    bg="danger"
+                    pill
+                    className="position-absolute top-0 start-100 translate-middle fw-bold"
+                    style={{ fontSize: '0.68rem', backgroundColor: 'var(--primary)' }}
+                  >
+                    {totalItems}
+                  </Badge>
+                )}
+              </Button>
+
+              <Navbar.Toggle
+                aria-controls="main-navbar-nav"
+                className="border-0 p-1 text-dark focus-ring-none"
+              >
+                <FaBars size={22} />
+              </Navbar.Toggle>
+            </div>
+          </div>
+
+          {/* Buscador Interactivo: En móvil ocupa fila completa debajo; en desktop se centra */}
           <form
             onSubmit={handleNavSearch}
-            className="navbar-search-container flex-grow-1 mx-2 mx-lg-4 order-3 order-lg-2"
+            className="navbar-search-container flex-grow-1 w-100 w-lg-auto my-2 my-lg-0 mx-lg-3 order-3 order-lg-2"
           >
             <div className="navbar-search-wrapper">
               <input
                 type="search"
                 className="navbar-search-input"
-                placeholder="Buscar globos, bengalas, vajilla, disfraces, cotillón..."
+                placeholder="Buscar globos, bengalas, vajilla, cotillón..."
                 value={navSearch}
                 onChange={(e) => setNavSearch(e.target.value)}
                 aria-label="Buscar en la tienda"
@@ -80,19 +114,14 @@ export default function AppNavbar() {
                 className="navbar-search-btn"
                 aria-label="Ejecutar búsqueda"
               >
-                <FaSearch size={14} />
+                <FaSearch size={13} />
               </button>
             </div>
           </form>
 
-          {/* Toggle Mobile */}
-          <Navbar.Toggle aria-controls="main-navbar-nav" className="border-0 text-dark order-2 order-lg-4">
-            <FaBars size={20} />
-          </Navbar.Toggle>
-
-          {/* Menú y Acciones de Usuario */}
+          {/* Menú y Acciones de Usuario (Desktop & Mobile Drawer) */}
           <Navbar.Collapse id="main-navbar-nav" className="order-4 order-lg-3">
-            <Nav className="me-auto my-2 my-lg-0 gap-1">
+            <Nav className="me-auto my-2 my-lg-0 gap-1 pt-2 pt-lg-0 border-top border-lg-0">
               <Nav.Link as={NavLink} to="/" className="nav-link-custom">
                 Inicio
               </Nav.Link>
@@ -116,9 +145,9 @@ export default function AppNavbar() {
               )}
             </Nav>
 
-            <div className="d-flex align-items-center gap-2 pt-2 pt-lg-0">
+            <div className="d-flex align-items-center gap-2 pt-3 pt-lg-0 border-top border-lg-0">
               {isLoggedIn ? (
-                <div className="d-flex align-items-center gap-2">
+                <div className="d-flex flex-wrap align-items-center gap-2 w-100 w-lg-auto">
                   {isStaff && (
                     <Link to="/admin" className="btn-admin-nav text-decoration-none py-2 px-3 small">
                       <FaCrown size={12} /> Admin
@@ -133,7 +162,7 @@ export default function AppNavbar() {
                   </Link>
                   <Button
                     variant="link"
-                    className="text-muted p-2 text-decoration-none hover-primary"
+                    className="text-muted p-2 text-decoration-none hover-primary ms-auto ms-lg-0"
                     onClick={logout}
                     title="Cerrar sesión"
                   >
@@ -141,20 +170,20 @@ export default function AppNavbar() {
                   </Button>
                 </div>
               ) : (
-                <div className="d-flex align-items-center gap-2">
-                  <Link to="/login" className="btn-monochrome-outline text-decoration-none py-2 px-3 small">
+                <div className="d-flex align-items-center gap-2 w-100 w-lg-auto">
+                  <Link to="/login" className="btn-monochrome-outline text-decoration-none py-2 px-3 small flex-grow-1 flex-lg-grow-0 text-center">
                     Ingresar
                   </Link>
-                  <Link to="/registro" className="btn-festive text-decoration-none py-2 px-3 small">
+                  <Link to="/registro" className="btn-festive text-decoration-none py-2 px-3 small flex-grow-1 flex-lg-grow-0 text-center">
                     Registro
                   </Link>
                 </div>
               )}
 
-              {/* Botón Carrito */}
+              {/* Botón Carrito en Desktop (Oculto en móvil porque ya está arriba) */}
               <Button
                 variant="link"
-                className="position-relative text-dark p-2 ms-2 text-decoration-none d-flex align-items-center justify-content-center"
+                className="position-relative text-dark p-2 ms-2 text-decoration-none d-none d-lg-flex align-items-center justify-content-center"
                 onClick={openCart}
                 aria-label="Abrir carrito"
               >

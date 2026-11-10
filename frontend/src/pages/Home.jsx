@@ -243,9 +243,9 @@ export default function Home() {
               <p className="text-muted small mt-2">Cargando catálogo...</p>
             </div>
           ) : (
-            <Row className="g-4">
+            <Row className="g-2 g-sm-3 g-lg-4">
               {products.map((product) => (
-                <Col lg={3} md={4} sm={6} key={product.id}>
+                <Col lg={3} md={4} sm={6} xs={6} key={product.id}>
                   <ProductCard product={product} />
                 </Col>
               ))}

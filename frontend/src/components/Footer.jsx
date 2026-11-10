@@ -21,8 +21,8 @@ export default function Footer() {
     <footer className="app-footer mt-auto">
       <Container>
         {/* Franja de Confianza y Beneficios */}
-        <div className="row g-3 mb-5">
-          <div className="col-lg-3 col-sm-6">
+        <div className="row g-2 g-sm-3 mb-4 mb-lg-5">
+          <div className="col-6 col-lg-3">
             <div className="footer-trust-badge">
               <FaTruck size={22} className="text-danger flex-shrink-0" />
               <div>
@@ -31,7 +31,7 @@ export default function Footer() {
               </div>
             </div>
           </div>
-          <div className="col-lg-3 col-sm-6">
+          <div className="col-6 col-lg-3">
             <div className="footer-trust-badge">
               <FaStore size={22} className="text-warning flex-shrink-0" />
               <div>
@@ -40,7 +40,7 @@ export default function Footer() {
               </div>
             </div>
           </div>
-          <div className="col-lg-3 col-sm-6">
+          <div className="col-6 col-lg-3">
             <div className="footer-trust-badge">
               <FaFileInvoiceDollar size={22} className="text-info flex-shrink-0" />
               <div>
@@ -49,7 +49,7 @@ export default function Footer() {
               </div>
             </div>
           </div>
-          <div className="col-lg-3 col-sm-6">
+          <div className="col-6 col-lg-3">
             <div className="footer-trust-badge">
               <FaShieldAlt size={22} className="text-success flex-shrink-0" />
               <div>
