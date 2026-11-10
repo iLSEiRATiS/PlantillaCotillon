@@ -5,31 +5,27 @@ import { FaSearch, FaShoppingCart, FaCheckCircle, FaQuestionCircle, FaFileInvoic
 export default function ComoComprar() {
   const steps = [
     {
-      num: '01',
       icon: <FaSearch size={22} className="text-danger" />,
       bgIcon: '#ffe4e6',
-      title: '1. Explora el Catálogo',
+      title: 'Explora el Catálogo',
       desc: 'Navega por nuestras categorías temáticas: globos, vajilla descartable, bengalas luminosas y guirnaldas. Puedes filtrar por estilo o buscar artículos específicos.',
     },
     {
-      num: '02',
       icon: <FaShoppingCart size={22} className="text-primary" />,
       bgIcon: '#e0e7ff',
-      title: '2. Arma tu Pedido',
+      title: 'Arma tu Pedido',
       desc: 'Selecciona las cantidades deseadas para tu evento o cumpleaños. En el carrito lateral puedes verificar el subtotal y el progreso hacia el monto mínimo.',
     },
     {
-      num: '03',
       icon: <FaFileInvoiceDollar size={22} className="text-warning" />,
       bgIcon: '#fef3c7',
-      title: '3. Datos de Entrega',
+      title: 'Datos de Entrega',
       desc: 'Indica tu dirección de despacho o selecciona retiro gratuito en depósito central. Puedes comprar como invitado o creando una cuenta para guardar tu historial.',
     },
     {
-      num: '04',
       icon: <FaCheckCircle size={22} className="text-success" />,
       bgIcon: '#d1fae5',
-      title: '4. ¡Listo para Festejar!',
+      title: '¡Listo para Festejar!',
       desc: 'Te asignamos un número de pedido al instante. Empaquetamos todo con el mayor cuidado y te avisamos por WhatsApp o email cuando esté en camino.',
     },
   ];
@@ -78,14 +74,13 @@ export default function ComoComprar() {
           {steps.map((st, i) => (
             <Col lg={3} sm={6} key={i}>
               <div className="step-card h-100 d-flex flex-column">
-                <div className="d-flex justify-content-between align-items-center mb-4">
+                <div className="mb-4">
                   <div
-                    className="p-3 rounded-circle d-flex align-items-center justify-content-center"
+                    className="p-3 rounded-circle d-inline-flex align-items-center justify-content-center"
                     style={{ backgroundColor: st.bgIcon, width: 54, height: 54 }}
                   >
                     {st.icon}
                   </div>
-                  <span className="step-number">{st.num}</span>
                 </div>
                 <h5 className="fw-bold mb-2" style={{ color: '#0f172a' }}>{st.title}</h5>
                 <p className="small mb-0 lh-base" style={{ color: '#475569' }}>{st.desc}</p>
