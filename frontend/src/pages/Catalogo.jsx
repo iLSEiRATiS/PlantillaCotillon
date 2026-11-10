@@ -8,8 +8,6 @@ import {
   FaList,
   FaChevronRight,
   FaChevronLeft,
-  FaBolt,
-  FaTruck,
   FaCreditCard,
 } from 'react-icons/fa';
 import api from '../services/api';
@@ -27,7 +25,6 @@ export default function Catalogo() {
   const currentSort = searchParams.get('sort') || '';
   const currentMinPrice = searchParams.get('min_price') || '';
   const currentMaxPrice = searchParams.get('max_price') || '';
-  const currentShipping = searchParams.get('shipping') || '';
   const currentInstallments = searchParams.get('installments') || '';
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
 
@@ -66,14 +63,9 @@ export default function Catalogo() {
     loadData();
   }, [currentCategory, currentSearch, currentSort, currentMinPrice, currentMaxPrice]);
 
-  // Client-side filtering for shipping/installments (if active)
+  // Client-side filtering for installments (if active)
   const filteredProducts = useMemo(() => {
     let result = [...products];
-
-    if (currentShipping === 'free') {
-      // Simulate free shipping or filter products with price > 3000
-      result = result.filter((p) => (p.precio || p.price || 0) >= 3000);
-    }
 
     if (currentInstallments === 'yes') {
       // Products with installment promotion
@@ -81,7 +73,7 @@ export default function Catalogo() {
     }
 
     return result;
-  }, [products, currentShipping, currentInstallments]);
+  }, [products, currentInstallments]);
 
   // Current category object
   const activeCategoryObj = categories.find((c) => c.slug === currentCategory);
@@ -178,7 +170,7 @@ export default function Catalogo() {
             </div>
 
             {/* Chips de Filtros Aplicados */}
-            {(currentCategory || currentSearch || currentMinPrice || currentMaxPrice || currentShipping || currentInstallments) && (
+            {(currentCategory || currentSearch || currentMinPrice || currentMaxPrice || currentInstallments) && (
               <div className="ml-filter-group pt-2">
                 <div className="d-flex align-items-center justify-content-between mb-2">
                   <span className="small text-secondary fw-bold text-uppercase">Filtros aplicados</span>
@@ -238,20 +230,6 @@ export default function Catalogo() {
                     </span>
                   )}
 
-                  {currentShipping && (
-                    <span className="ml-chip">
-                      Envío gratis
-                      <button
-                        type="button"
-                        className="ml-chip-btn"
-                        onClick={() => updateParams({ shipping: '' })}
-                        title="Quitar filtro de envío"
-                      >
-                        <FaTimes size={10} />
-                      </button>
-                    </span>
-                  )}
-
                   {currentInstallments && (
                     <span className="ml-chip">
                       Cuotas sin interés
@@ -298,28 +276,7 @@ export default function Catalogo() {
               </ul>
             </div>
 
-            {/* Grupo 2: Costo de Envío */}
-            <div className="ml-filter-group">
-              <h3 className="ml-filter-heading">Costo de envío</h3>
-              <label className="ml-switch-label">
-                <input
-                  type="checkbox"
-                  className="ml-switch-input"
-                  checked={currentShipping === 'free'}
-                  onChange={(e) =>
-                    updateParams({ shipping: e.target.checked ? 'free' : '' })
-                  }
-                />
-                <span className="d-flex align-items-center gap-1 text-success fw-semibold">
-                  <FaTruck size={13} /> Envío gratis
-                </span>
-              </label>
-              <div className="text-secondary small mt-1" style={{ fontSize: '0.78rem' }}>
-                En artículos seleccionados de cotillón
-              </div>
-            </div>
-
-            {/* Grupo 3: Pago y Financiación */}
+            {/* Grupo 2: Pago y Financiación */}
             <div className="ml-filter-group">
               <h3 className="ml-filter-heading">Pago</h3>
               <label className="ml-switch-label">
@@ -340,7 +297,7 @@ export default function Catalogo() {
               </div>
             </div>
 
-            {/* Grupo 4: Precio */}
+            {/* Grupo 3: Precio */}
             <div className="ml-filter-group">
               <h3 className="ml-filter-heading">Precio</h3>
               <ul className="ml-filter-list mb-3">
@@ -393,35 +350,7 @@ export default function Catalogo() {
               </form>
             </div>
 
-            {/* Grupo 5: Modalidad de Entrega */}
-            <div className="ml-filter-group">
-              <h3 className="ml-filter-heading">Modalidad de entrega</h3>
-              <div className="d-flex align-items-center gap-2 text-success fw-bold small mb-2">
-                <FaBolt size={12} />
-                <span style={{ fontStyle: 'italic', fontSize: '0.9rem' }}>FULL</span>
-                <span className="text-secondary fw-normal" style={{ fontSize: '0.78rem' }}>
-                  Despacho inmediato
-                </span>
-              </div>
-              <div className="text-secondary small" style={{ fontSize: '0.8rem' }}>
-                Stock listo en depósito central
-              </div>
-            </div>
-
-            {/* Grupo 6: Condición */}
-            <div className="ml-filter-group">
-              <h3 className="ml-filter-heading">Condición</h3>
-              <ul className="ml-filter-list">
-                <li className="ml-filter-item">
-                  <span className="ml-filter-link active">
-                    <span>Nuevo</span>
-                    <span className="ml-filter-count">({products.length})</span>
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Grupo 7: Ubicación */}
+            {/* Grupo 4: Ubicación */}
             <div className="ml-filter-group">
               <h3 className="ml-filter-heading">Ubicación de despacho</h3>
               <ul className="ml-filter-list">
