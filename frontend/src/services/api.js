@@ -42,6 +42,8 @@ export const api = {
     if (params.category) sp.append('category', params.category);
     if (params.category_id) sp.append('category_id', params.category_id);
     if (params.sort) sp.append('sort', params.sort);
+    if (params.min_price || params.minPrice) sp.append('min_price', params.min_price || params.minPrice);
+    if (params.max_price || params.maxPrice) sp.append('max_price', params.max_price || params.maxPrice);
     if (params.page) sp.append('page', params.page);
     if (params.limit) sp.append('limit', params.limit);
     const qs = sp.toString();

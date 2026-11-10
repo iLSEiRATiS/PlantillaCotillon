@@ -62,6 +62,10 @@ router.get('/', async (req, res) => {
       category_id,
       cat,
       sort,
+      min_price,
+      max_price,
+      minPrice,
+      maxPrice,
       page = 1,
       limit = 24,
       all,
@@ -75,6 +79,14 @@ router.get('/', async (req, res) => {
     const where = {};
     if (!includeInactive) {
       where.activo = true;
+    }
+
+    const minP = parseFloat(min_price || minPrice);
+    const maxP = parseFloat(max_price || maxPrice);
+    if (!isNaN(minP) || !isNaN(maxP)) {
+      where.precio = {};
+      if (!isNaN(minP)) where.precio.gte = minP;
+      if (!isNaN(maxP)) where.precio.lte = maxP;
     }
 
     if (searchTerm) {

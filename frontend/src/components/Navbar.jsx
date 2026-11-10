@@ -19,7 +19,7 @@ export default function AppNavbar() {
       {/* Barra de anuncio festiva */}
       <div className="announcement-bar d-flex align-items-center justify-content-center">
         <FaStar size={11} className="text-warning me-2" />
-        <span>¡Bienvenidos a <strong>CotiFiesta</strong>! • Cotillón Mayorista & Minorista • Envíos a todo el país • Atención WhatsApp: 11 5555-0000</span>
+        <span>¡Bienvenidos a <strong>CotiFiesta</strong>! • Envíos a todo el país • Atención WhatsApp: 11 5555-0000</span>
       </div>
 
       <Navbar expand="lg" className="app-navbar" variant="light">

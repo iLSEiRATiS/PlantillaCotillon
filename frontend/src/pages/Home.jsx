@@ -42,11 +42,8 @@ export default function Home() {
       <section className="hero-banner text-center">
         <Container>
           <div className="mx-auto" style={{ maxWidth: '840px' }}>
-            <span className="festive-pill mb-3">
-              <FaGift size={13} className="text-danger me-1" /> Cotillón Mayorista & Minorista
-            </span>
-            <h1 className="display-4 fw-bold mb-3 tracking-tight" style={{ color: '#0f172a' }}>
-              ¡Todo para que tu Fiesta sea <span style={{ color: 'var(--primary)' }}>Inolvidable</span>!
+            <h1 className="display-4 fw-bold mb-3 tracking-tight" style={{ color: '#000000' }}>
+              ¡Todo para que tu Fiesta sea Inolvidable!
             </h1>
             <p className="lead text-secondary mb-4 mx-auto" style={{ maxWidth: '640px', fontSize: '1.15rem' }}>
               Encuentra los mejores globos, vajilla descartable, bengalas de humo, guirnaldas y artículos de carnaval carioca para tus festejos y eventos.
@@ -110,8 +107,8 @@ export default function Home() {
           <Container>
             <div className="d-flex justify-content-between align-items-end mb-4">
               <div>
-                <span className="text-danger small text-uppercase fw-bold tracking-wider">Categorías</span>
-                <h2 className="h3 fw-bold mb-0" style={{ color: '#0f172a' }}>Explora por Rubro</h2>
+                <span className="text-danger small text-uppercase fw-bold tracking-wider">Festividades</span>
+                <h2 className="h3 fw-bold mb-0" style={{ color: '#0f172a' }}>Explora por Festividad</h2>
               </div>
               <Link to="/catalogo" className="fw-bold text-danger small d-flex align-items-center gap-1">
                 Ver todas <FaArrowRight size={11} />
@@ -133,7 +130,7 @@ export default function Home() {
                     >
                       <div>
                         <span className="small fw-bold mb-1 d-block" style={{ color: theme.text }}>
-                          Colección
+                          Festividad
                         </span>
                         <h5 className="fw-bold mb-2" style={{ color: '#0f172a' }}>{cat.nombre}</h5>
                         <p className="text-muted small mb-0 lh-sm">{cat.descripcion || 'Artículos festivos y cotillón.'}</p>

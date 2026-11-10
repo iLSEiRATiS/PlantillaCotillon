@@ -136,35 +136,45 @@ export default function Footer() {
             </ul>
           </Col>
 
-          {/* Columna 3: Categorías Populares */}
+          {/* Columna 3: Festividades & Eventos */}
           <Col lg={3} sm={6}>
             <h6 className="fw-bold mb-3 text-uppercase" style={{ fontSize: '0.85rem', letterSpacing: '0.08em', color: '#ffffff' }}>
               Rubros Festivos
             </h6>
             <ul className="list-unstyled d-flex flex-column gap-2 mb-0">
               <li>
-                <Link to="/catalogo?cat=globos-arreglos" className="footer-link">
-                  Globos & Arreglos Inflables
+                <Link to="/catalogo?cat=halloween" className="footer-link">
+                  Halloween & Noche de Brujas
                 </Link>
               </li>
               <li>
-                <Link to="/catalogo?cat=vajilla-deco-mesa" className="footer-link">
-                  Vajilla Descartable & Deco
+                <Link to="/catalogo?cat=navidad" className="footer-link">
+                  Navidad & Fin de Año
                 </Link>
               </li>
               <li>
-                <Link to="/catalogo?cat=velas-bengalas" className="footer-link">
-                  Velas & Bengalas Luminosas
+                <Link to="/catalogo?cat=egresados" className="footer-link">
+                  Egresados & Graduaciones
                 </Link>
               </li>
               <li>
-                <Link to="/catalogo?cat=guirnaldas-banners" className="footer-link">
-                  Guirnaldas & Fondos Fotográficos
+                <Link to="/catalogo?cat=comuniones" className="footer-link">
+                  Comuniones & Bautismos
+                </Link>
+              </li>
+              <li>
+                <Link to="/catalogo?cat=san-patricio" className="footer-link">
+                  San Patricio & Temáticas
+                </Link>
+              </li>
+              <li>
+                <Link to="/catalogo?cat=cumpleanos" className="footer-link">
+                  Cumpleaños & Aniversarios
                 </Link>
               </li>
               <li>
                 <Link to="/catalogo?cat=carnaval-carioca" className="footer-link">
-                  Carnaval Carioca & Props
+                  Carnaval Carioca & Despedidas
                 </Link>
               </li>
             </ul>
