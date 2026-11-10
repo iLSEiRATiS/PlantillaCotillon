@@ -65,6 +65,7 @@ model Order {
   telefono              String?     @default("")
   destinatarioDocumento String?     @default("")
   nota                  String?     @default("")
+  metodoPago            String?     @default("transferencia") // mercadopago, transferencia, efectivo
   status                String      @default("created") // created, review, shipped, paid, delivered, cancelled
   envio                 Float       @default(0.0)
   total                 Float       @default(0.0)
@@ -94,6 +95,25 @@ model StoreSettings {
   maintenanceMode    Boolean  @default(false)
   maintenanceTitle   String   @default("Estamos en mantenimiento")
   maintenanceMessage String   @default("Volveremos en breve con novedades y nuevos productos.")
+
+  // Pasarelas de Pago
+  mpEnabled          Boolean  @default(false)
+  mpPublicKey        String   @default("")
+  mpAccessToken      String   @default("")
+  mpSandbox          Boolean  @default(true)
+  mpInstallments     Int      @default(3)
+
+  transferEnabled    Boolean  @default(true)
+  transferDiscount   Float    @default(10.0)
+  transferBank       String   @default("Banco Santander")
+  transferHolder     String   @default("CotiFiesta S.A.")
+  transferCbu        String   @default("0720123488000012345678")
+  transferAlias      String   @default("COTIFIESTA.FIESTA")
+  transferCuit       String   @default("30-71234567-9")
+
+  cashEnabled        Boolean  @default(true)
+  cashInstructions   String   @default("Pago en efectivo al retirar en nuestro depósito central.")
+
   updatedAt          DateTime @updatedAt
 }
 

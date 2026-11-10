@@ -1,7 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Alert, Spinner, Badge } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaCheckCircle, FaShoppingBag, FaArrowLeft, FaShieldAlt, FaTruck, FaLock } from 'react-icons/fa';
+import { 
+  FaCheckCircle, 
+  FaShoppingBag, 
+  FaArrowLeft, 
+  FaShieldAlt, 
+  FaTruck, 
+  FaLock, 
+  FaCreditCard, 
+  FaMoneyBillWave, 
+  FaStore,
+  FaCheck
+} from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -16,6 +27,9 @@ export default function Checkout() {
 
   const subtotal = getSubtotal();
   const [minOrder, setMinOrder] = useState(15000);
+  const [storeConfig, setStoreConfig] = useState(null);
+  const [metodoPago, setMetodoPago] = useState('transferencia');
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [orderCreated, setOrderCreated] = useState(null);
@@ -36,8 +50,17 @@ export default function Checkout() {
     async function loadConfig() {
       try {
         const config = await api.getStoreConfig();
+        setStoreConfig(config);
         if (config?.minOrderAmount) {
           setMinOrder(config.minOrderAmount);
+        }
+        // Seleccionar método activo por defecto
+        if (config?.transferEnabled) {
+          setMetodoPago('transferencia');
+        } else if (config?.mpEnabled) {
+          setMetodoPago('mercadopago');
+        } else if (config?.cashEnabled) {
+          setMetodoPago('efectivo');
         }
       } catch (e) {
         // Fallback default
@@ -49,6 +72,12 @@ export default function Checkout() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  // Cálculo de descuento por transferencia
+  const transferDiscountPct = storeConfig?.transferEnabled ? (storeConfig.transferDiscount || 0) : 0;
+  const isTransfer = metodoPago === 'transferencia';
+  const discountAmount = isTransfer ? (subtotal * transferDiscountPct) / 100 : 0;
+  const finalTotal = subtotal - discountAmount;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,6 +97,7 @@ export default function Checkout() {
     try {
       const payload = {
         ...form,
+        metodo_pago: metodoPago,
         envio: 0,
         items: items.map((it) => ({
           product_id: it.id,
@@ -79,7 +109,7 @@ export default function Checkout() {
       };
 
       const res = await api.createOrder(payload, token);
-      setOrderCreated(res);
+      setOrderCreated({ ...res, metodoPagoSeleccionado: metodoPago, discountAmount });
       clearCart();
     } catch (err) {
       setError(err.message || 'Error al procesar el pedido. Por favor intenta nuevamente.');
@@ -89,12 +119,16 @@ export default function Checkout() {
   };
 
   if (orderCreated) {
+    const isTransfOrder = orderCreated.metodo_pago === 'transferencia' || orderCreated.metodoPagoSeleccionado === 'transferencia';
+    const isMpOrder = orderCreated.metodo_pago === 'mercadopago' || orderCreated.metodoPagoSeleccionado === 'mercadopago';
+    const isCashOrder = orderCreated.metodo_pago === 'efectivo' || orderCreated.metodoPagoSeleccionado === 'efectivo';
+
     return (
       <Container className="py-5 text-center my-auto">
         <div
-          className="p-5 rounded-4 mx-auto"
+          className="p-4 p-md-5 rounded-4 mx-auto"
           style={{
-            maxWidth: '620px',
+            maxWidth: '680px',
             backgroundColor: '#ffffff',
             border: '1.5px solid #e2e8f0',
             boxShadow: 'var(--shadow-card-hover)',
@@ -110,9 +144,62 @@ export default function Checkout() {
             ¡Felicitaciones! Pedido #{orderCreated.id} Recibido
           </h2>
           <p className="small mb-4" style={{ color: '#475569', fontSize: '1rem' }}>
-            Muchas gracias por tu compra, <strong>{orderCreated.nombre}</strong>. Hemos registrado tu orden por un total de{' '}
+            Muchas gracias por tu compra, <strong>{orderCreated.nombre}</strong>. Hemos registrado tu pedido por un total de{' '}
             <strong style={{ color: '#e11d48' }}>{formatMoney(orderCreated.total)}</strong>.
           </p>
+
+          {/* INSTRUCCIONES SEGÚN MÉTODO DE PAGO */}
+          {isTransfOrder && storeConfig && (
+            <div
+              className="p-4 rounded-3 text-start mb-4"
+              style={{ backgroundColor: '#ecfdf5', border: '1.5px solid #a7f3d0' }}
+            >
+              <h6 className="fw-bold text-success mb-2 d-flex align-items-center gap-2">
+                <FaMoneyBillWave /> Datos para Realizar la Transferencia (¡{transferDiscountPct}% OFF Aplicado!):
+              </h6>
+              <div className="small mb-2" style={{ color: '#065f46' }}>
+                Realiza la transferencia por <strong>{formatMoney(orderCreated.total)}</strong> a la siguiente cuenta bancaria:
+              </div>
+              <div className="p-3 rounded-2 bg-white border small" style={{ color: '#1e293b' }}>
+                <div><strong>Banco:</strong> {storeConfig.transferBank}</div>
+                <div><strong>Titular:</strong> {storeConfig.transferHolder}</div>
+                <div><strong>CBU:</strong> <code className="fw-bold fs-6">{storeConfig.transferCbu}</code></div>
+                <div><strong>Alias:</strong> <code className="fw-bold fs-6">{storeConfig.transferAlias}</code></div>
+                <div><strong>CUIT:</strong> {storeConfig.transferCuit}</div>
+              </div>
+              <small className="text-muted d-block mt-2">
+                Envíanos tu comprobante por WhatsApp al 11 5555-0000 o responde al email con el # de orden.
+              </small>
+            </div>
+          )}
+
+          {isMpOrder && (
+            <div
+              className="p-4 rounded-3 text-start mb-4"
+              style={{ backgroundColor: '#e0f2fe', border: '1.5px solid #bae6fd' }}
+            >
+              <h6 className="fw-bold text-primary mb-2 d-flex align-items-center gap-2">
+                <FaCreditCard /> Pago con Mercado Pago / Tarjetas
+              </h6>
+              <p className="small mb-2" style={{ color: '#0369a1' }}>
+                Tu orden ha sido pre-autorizada. Se enviará a tu email ({orderCreated.email}) el enlace de cobro seguro de Mercado Pago para abonar con tarjeta en hasta {storeConfig?.mpInstallments || 3} cuotas.
+              </p>
+            </div>
+          )}
+
+          {isCashOrder && (
+            <div
+              className="p-4 rounded-3 text-start mb-4"
+              style={{ backgroundColor: '#fef3c7', border: '1.5px solid #fde68a' }}
+            >
+              <h6 className="fw-bold text-warning mb-2 d-flex align-items-center gap-2" style={{ color: '#b45309' }}>
+                <FaStore /> Retiro y Pago en Depósito
+              </h6>
+              <p className="small mb-0" style={{ color: '#78350f' }}>
+                {storeConfig?.cashInstructions || 'Puedes abonar en efectivo al retirar en Av. Corrientes 3450, Almagro.'}
+              </p>
+            </div>
+          )}
 
           <div
             className="p-3 rounded-3 text-start mb-4 small"
@@ -185,7 +272,7 @@ export default function Checkout() {
             Finalizar Compra
           </h1>
           <p className="small mb-0" style={{ color: '#64748b' }}>
-            Ingresa los datos para la entrega y confirmación de tus artículos de cotillón.
+            Ingresa los datos para la entrega y elige tu método de pago preferido.
           </p>
         </div>
 
@@ -195,7 +282,7 @@ export default function Checkout() {
           {/* Formulario */}
           <Col lg={7}>
             <div
-              className="p-4 p-md-5 rounded-4"
+              className="p-4 p-md-5 rounded-4 mb-4"
               style={{
                 backgroundColor: '#ffffff',
                 border: '1.5px solid #e2e8f0',
@@ -203,7 +290,7 @@ export default function Checkout() {
               }}
             >
               <h5 className="fw-bold mb-3 d-flex align-items-center gap-2" style={{ color: '#0f172a' }}>
-                <FaTruck className="text-danger" /> Datos del Destinatario y Envío
+                <FaTruck className="text-danger" /> 1. Datos del Destinatario y Envío
               </h5>
               <Form onSubmit={handleSubmit}>
                 <Row className="g-3 mb-3">
@@ -333,6 +420,102 @@ export default function Checkout() {
                   />
                 </div>
 
+                {/* 2. FORMA DE PAGO */}
+                <h5 className="fw-bold mb-3 d-flex align-items-center gap-2 pt-3 border-top" style={{ color: '#0f172a' }}>
+                  <FaCreditCard className="text-primary" /> 2. Método de Pago
+                </h5>
+
+                <div className="d-flex flex-column gap-3 mb-4">
+                  {/* Transferencia */}
+                  {storeConfig?.transferEnabled !== false && (
+                    <div
+                      className={`p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer ${
+                        metodoPago === 'transferencia' ? 'border-primary bg-light' : 'bg-white'
+                      }`}
+                      style={{ cursor: 'pointer', borderColor: metodoPago === 'transferencia' ? '#e11d48' : '#e2e8f0' }}
+                      onClick={() => setMetodoPago('transferencia')}
+                    >
+                      <div className="d-flex align-items-center gap-3">
+                        <Form.Check
+                          type="radio"
+                          name="paymentRadio"
+                          id="pay-transf"
+                          checked={metodoPago === 'transferencia'}
+                          onChange={() => setMetodoPago('transferencia')}
+                        />
+                        <div>
+                          <div className="fw-bold" style={{ color: '#0f172a' }}>
+                            Transferencia Bancaria Directa
+                            {transferDiscountPct > 0 && (
+                              <Badge bg="success" className="ms-2">¡{transferDiscountPct}% OFF!</Badge>
+                            )}
+                          </div>
+                          <small className="text-muted">CBU / Alias inmediato sin comisiones adicionales.</small>
+                        </div>
+                      </div>
+                      <FaMoneyBillWave size={22} className="text-success" />
+                    </div>
+                  )}
+
+                  {/* Mercado Pago */}
+                  {storeConfig?.mpEnabled && (
+                    <div
+                      className={`p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer ${
+                        metodoPago === 'mercadopago' ? 'border-primary bg-light' : 'bg-white'
+                      }`}
+                      style={{ cursor: 'pointer', borderColor: metodoPago === 'mercadopago' ? '#e11d48' : '#e2e8f0' }}
+                      onClick={() => setMetodoPago('mercadopago')}
+                    >
+                      <div className="d-flex align-items-center gap-3">
+                        <Form.Check
+                          type="radio"
+                          name="paymentRadio"
+                          id="pay-mp"
+                          checked={metodoPago === 'mercadopago'}
+                          onChange={() => setMetodoPago('mercadopago')}
+                        />
+                        <div>
+                          <div className="fw-bold" style={{ color: '#0f172a' }}>
+                            Mercado Pago (Tarjetas & Dinero en Cuenta)
+                          </div>
+                          <small className="text-muted">
+                            Visa, Mastercard, Cabal, Débito en hasta {storeConfig?.mpInstallments || 3} cuotas.
+                          </small>
+                        </div>
+                      </div>
+                      <FaCreditCard size={22} className="text-info" />
+                    </div>
+                  )}
+
+                  {/* Efectivo */}
+                  {storeConfig?.cashEnabled !== false && (
+                    <div
+                      className={`p-3 rounded-3 border d-flex align-items-center justify-content-between cursor-pointer ${
+                        metodoPago === 'efectivo' ? 'border-primary bg-light' : 'bg-white'
+                      }`}
+                      style={{ cursor: 'pointer', borderColor: metodoPago === 'efectivo' ? '#e11d48' : '#e2e8f0' }}
+                      onClick={() => setMetodoPago('efectivo')}
+                    >
+                      <div className="d-flex align-items-center gap-3">
+                        <Form.Check
+                          type="radio"
+                          name="paymentRadio"
+                          id="pay-cash"
+                          checked={metodoPago === 'efectivo'}
+                          onChange={() => setMetodoPago('efectivo')}
+                        />
+                        <div>
+                          <div className="fw-bold" style={{ color: '#0f172a' }}>
+                            Efectivo al Retirar en Depósito Central
+                          </div>
+                          <small className="text-muted">Abona al retirar tu pedido sin cargo de flete.</small>
+                        </div>
+                      </div>
+                      <FaStore size={22} className="text-warning" />
+                    </div>
+                  )}
+                </div>
+
                 <Button
                   type="submit"
                   className="btn-festive w-100 py-3 fw-bold fs-6"
@@ -342,7 +525,7 @@ export default function Checkout() {
                     <Spinner animation="border" size="sm" />
                   ) : (
                     <>
-                      <FaLock size={14} className="me-1" /> Confirmar Pedido • {formatMoney(subtotal)}
+                      <FaLock size={14} className="me-1" /> Confirmar Pedido • {formatMoney(finalTotal)}
                     </>
                   )}
                 </Button>
@@ -365,7 +548,7 @@ export default function Checkout() {
                 Resumen de la Orden
               </h5>
 
-              <div className="d-flex flex-column gap-3 mb-4 overflow-auto pe-1" style={{ maxHeight: '300px' }}>
+              <div className="d-flex flex-column gap-3 mb-4 overflow-auto pe-1" style={{ maxHeight: '280px' }}>
                 {items.map((it) => (
                   <div
                     key={it.id}
@@ -376,7 +559,7 @@ export default function Checkout() {
                       <img
                         src={it.imageUrl}
                         alt={it.name}
-                        style={{ width: 48, height: 48, borderRadius: '8px', objectFit: 'cover' }}
+                        style={{ width: 44, height: 44, borderRadius: '8px', objectFit: 'cover' }}
                       />
                       <div className="min-w-0">
                         <div className="small fw-bold text-truncate" style={{ color: '#0f172a' }}>{it.name}</div>
@@ -391,19 +574,27 @@ export default function Checkout() {
               </div>
 
               <div className="d-flex justify-content-between align-items-center mb-2">
-                <span className="small" style={{ color: '#64748b' }}>Subtotal</span>
+                <span className="small" style={{ color: '#64748b' }}>Subtotal Artículos</span>
                 <span className="fw-bold" style={{ color: '#0f172a' }}>{formatMoney(subtotal)}</span>
               </div>
+
+              {isTransfer && discountAmount > 0 && (
+                <div className="d-flex justify-content-between align-items-center mb-2 text-success">
+                  <span className="small fw-bold">Descuento Transferencia ({transferDiscountPct}%)</span>
+                  <span className="fw-bold">-{formatMoney(discountAmount)}</span>
+                </div>
+              )}
+
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <span className="small" style={{ color: '#64748b' }}>Costo de Envío</span>
-                <span className="small fw-bold text-success">A coordinar / Sin cargo retiro</span>
+                <span className="small fw-bold text-success">A coordinar / Retiro sin costo</span>
               </div>
 
               <hr className="my-2" style={{ borderColor: '#e2e8f0' }} />
 
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <span className="h6 fw-bold mb-0" style={{ color: '#0f172a' }}>Total Final</span>
-                <span className="h4 fw-bold mb-0" style={{ color: '#e11d48' }}>{formatMoney(subtotal)}</span>
+                <span className="h6 fw-bold mb-0" style={{ color: '#0f172a' }}>Total a Pagar</span>
+                <span className="h4 fw-bold mb-0" style={{ color: '#e11d48' }}>{formatMoney(finalTotal)}</span>
               </div>
 
               {subtotal < minOrder && (
@@ -415,7 +606,7 @@ export default function Checkout() {
               <div className="mt-3 p-3 rounded-3" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }}>
                 <div className="d-flex align-items-center gap-2 small text-muted">
                   <FaShieldAlt className="text-success" />
-                  <span>Compra protegida y despacho garantizado.</span>
+                  <span>Compra protegida y confirmación inmediata con comprobante digital.</span>
                 </div>
               </div>
             </div>

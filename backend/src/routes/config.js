@@ -29,6 +29,20 @@ router.get('/store-config', async (req, res) => {
       maintenanceMode: settings.maintenanceMode,
       maintenanceTitle: settings.maintenanceTitle,
       maintenanceMessage: settings.maintenanceMessage,
+      // Pasarelas de Pago
+      mpEnabled: settings.mpEnabled || false,
+      mpPublicKey: settings.mpPublicKey || '',
+      mpSandbox: settings.mpSandbox !== undefined ? settings.mpSandbox : true,
+      mpInstallments: settings.mpInstallments || 3,
+      transferEnabled: settings.transferEnabled !== undefined ? settings.transferEnabled : true,
+      transferDiscount: settings.transferDiscount || 10.0,
+      transferBank: settings.transferBank || 'Banco Santander',
+      transferHolder: settings.transferHolder || 'CotiFiesta S.A.',
+      transferCbu: settings.transferCbu || '0720123488000012345678',
+      transferAlias: settings.transferAlias || 'COTIFIESTA.FIESTA',
+      transferCuit: settings.transferCuit || '30-71234567-9',
+      cashEnabled: settings.cashEnabled !== undefined ? settings.cashEnabled : true,
+      cashInstructions: settings.cashInstructions || 'Pago en efectivo al retirar en nuestro depósito central.',
     });
   } catch (error) {
     console.error('Error en /api/store-config:', error);

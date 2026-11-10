@@ -161,6 +161,102 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Admin: importación masiva de productos (XLSX / CSV)
+router.post('/bulk', requireAdmin, async (req, res) => {
+  try {
+    const { products } = req.body;
+    if (!Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ detail: 'El listado de productos a importar no es válido o está vacío.' });
+    }
+
+    const categoriesCache = await prisma.category.findMany();
+    const catMap = new Map();
+    categoriesCache.forEach(c => {
+      catMap.set(c.nombre.toLowerCase().trim(), c.id);
+      catMap.set(c.slug.toLowerCase().trim(), c.id);
+    });
+
+    const createdList = [];
+    const errorsList = [];
+
+    for (let i = 0; i < products.length; i++) {
+      const row = products[i];
+      const nombre = (row.nombre || row.name || row.Nombre || row.articulo || '').trim();
+      const rawPrice = row.precio !== undefined ? row.precio : (row.price !== undefined ? row.price : row.Precio);
+      const precio = parseFloat(rawPrice);
+
+      if (!nombre || isNaN(precio) || precio < 0) {
+        errorsList.push({ row: i + 1, error: 'Nombre o precio no válido', data: row });
+        continue;
+      }
+
+      // Determinar o crear categoría
+      let categoriaId = null;
+      const catInput = (row.categoria || row.category || row.Categoría || row.rubro || '').trim();
+      if (catInput) {
+        const catKey = catInput.toLowerCase();
+        if (catMap.has(catKey)) {
+          categoriaId = catMap.get(catKey);
+        } else {
+          // Crear categoría automáticamente si no existe
+          const catSlug = catKey.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          try {
+            const newCat = await prisma.category.create({
+              data: {
+                nombre: catInput,
+                slug: catSlug || `cat-${Date.now()}`,
+                descripcion: `Artículos de ${catInput}`,
+              },
+            });
+            catMap.set(catKey, newCat.id);
+            categoriaId = newCat.id;
+          } catch (e) {
+            // Si hubo colisión de slug
+            const fallback = await prisma.category.findFirst({ where: { slug: catSlug } });
+            categoriaId = fallback ? fallback.id : null;
+          }
+        }
+      }
+
+      const slug = nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Math.random().toString(36).substring(2, 6);
+      const sku = (row.sku || row.codigo || `SKU-${Math.floor(1000 + Math.random() * 9000)}`).toString().trim();
+      const stock = parseInt(row.stock || row.Stock || 100, 10);
+      const imageUrl = (row.imageUrl || row.image_url || row.imagen || row.ImagenURL || '').trim();
+      const descripcion = (row.descripcion || row.description || row.detalles || row.Descripción || '').trim();
+
+      try {
+        const newProd = await prisma.product.create({
+          data: {
+            nombre,
+            slug,
+            sku,
+            precio,
+            stock: isNaN(stock) ? 100 : stock,
+            imageUrl,
+            descripcion,
+            categoriaId,
+          },
+          include: { categoria: true },
+        });
+        createdList.push(formatProduct(newProd));
+      } catch (err) {
+        errorsList.push({ row: i + 1, error: err.message, nombre });
+      }
+    }
+
+    return res.status(201).json({
+      ok: true,
+      count: createdList.length,
+      errorsCount: errorsList.length,
+      items: createdList,
+      errors: errorsList,
+    });
+  } catch (error) {
+    console.error('Error en /api/products/bulk:', error);
+    return res.status(500).json({ detail: 'Error al procesar importación masiva.' });
+  }
+});
+
 // Admin: crear producto
 router.post('/', requireAdmin, async (req, res) => {
   try {

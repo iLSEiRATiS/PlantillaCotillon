@@ -42,16 +42,56 @@ router.get('/store-config', async (req, res) => {
 // POST or PUT /api/admin/store-config
 const updateStoreConfig = async (req, res) => {
   try {
-    const { minOrderAmount, showPricesToGuests, maintenanceMode, maintenanceTitle, maintenanceMessage } = req.body;
+    const { 
+      minOrderAmount, 
+      showPricesToGuests, 
+      maintenanceMode, 
+      maintenanceTitle, 
+      maintenanceMessage,
+      mpEnabled,
+      mpPublicKey,
+      mpAccessToken,
+      mpSandbox,
+      mpInstallments,
+      transferEnabled,
+      transferDiscount,
+      transferBank,
+      transferHolder,
+      transferCbu,
+      transferAlias,
+      transferCuit,
+      cashEnabled,
+      cashInstructions,
+    } = req.body;
+
+    const data = {};
+    if (minOrderAmount !== undefined) data.minOrderAmount = parseFloat(minOrderAmount);
+    if (showPricesToGuests !== undefined) data.showPricesToGuests = Boolean(showPricesToGuests);
+    if (maintenanceMode !== undefined) data.maintenanceMode = Boolean(maintenanceMode);
+    if (maintenanceTitle !== undefined) data.maintenanceTitle = maintenanceTitle;
+    if (maintenanceMessage !== undefined) data.maintenanceMessage = maintenanceMessage;
+
+    // Pasarelas de Pago
+    if (mpEnabled !== undefined) data.mpEnabled = Boolean(mpEnabled);
+    if (mpPublicKey !== undefined) data.mpPublicKey = mpPublicKey;
+    if (mpAccessToken !== undefined) data.mpAccessToken = mpAccessToken;
+    if (mpSandbox !== undefined) data.mpSandbox = Boolean(mpSandbox);
+    if (mpInstallments !== undefined) data.mpInstallments = parseInt(mpInstallments, 10);
+
+    if (transferEnabled !== undefined) data.transferEnabled = Boolean(transferEnabled);
+    if (transferDiscount !== undefined) data.transferDiscount = parseFloat(transferDiscount);
+    if (transferBank !== undefined) data.transferBank = transferBank;
+    if (transferHolder !== undefined) data.transferHolder = transferHolder;
+    if (transferCbu !== undefined) data.transferCbu = transferCbu;
+    if (transferAlias !== undefined) data.transferAlias = transferAlias;
+    if (transferCuit !== undefined) data.transferCuit = transferCuit;
+
+    if (cashEnabled !== undefined) data.cashEnabled = Boolean(cashEnabled);
+    if (cashInstructions !== undefined) data.cashInstructions = cashInstructions;
+
     const settings = await prisma.storeSettings.upsert({
       where: { id: 1 },
-      update: {
-        minOrderAmount: minOrderAmount !== undefined ? parseFloat(minOrderAmount) : undefined,
-        showPricesToGuests: showPricesToGuests !== undefined ? Boolean(showPricesToGuests) : undefined,
-        maintenanceMode: maintenanceMode !== undefined ? Boolean(maintenanceMode) : undefined,
-        maintenanceTitle: maintenanceTitle !== undefined ? maintenanceTitle : undefined,
-        maintenanceMessage: maintenanceMessage !== undefined ? maintenanceMessage : undefined,
-      },
+      update: data,
       create: {
         id: 1,
         minOrderAmount: parseFloat(minOrderAmount || 15000),
@@ -59,6 +99,7 @@ const updateStoreConfig = async (req, res) => {
         maintenanceMode: Boolean(maintenanceMode),
         maintenanceTitle: maintenanceTitle || '',
         maintenanceMessage: maintenanceMessage || '',
+        ...data,
       },
     });
 
