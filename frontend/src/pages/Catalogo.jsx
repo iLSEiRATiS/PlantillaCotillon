@@ -165,7 +165,9 @@ export default function Catalogo() {
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-5 my-5 bg-white rounded-3 border p-5 shadow-sm">
-            <span className="display-4 d-block mb-2">🔍</span>
+            <div className="p-3 rounded-circle d-inline-flex mb-3 shadow-sm border" style={{ backgroundColor: '#f8fafc', color: '#64748b' }}>
+              <FaSearch size={32} />
+            </div>
             <h5 className="fw-bold mb-2" style={{ color: '#0f172a' }}>No se encontraron productos</h5>
             <p className="text-muted small mb-3">
               No hay artículos que coincidan con los criterios de búsqueda o categoría seleccionados.

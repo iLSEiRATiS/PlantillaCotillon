@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Navbar, Nav, Container, Button, Badge } from 'react-bootstrap';
 import { Link, NavLink } from 'react-router-dom';
-import { FaShoppingBag, FaUser, FaSignOutAlt, FaBars, FaCog, FaCrown } from 'react-icons/fa';
+import { FaShoppingBag, FaUser, FaSignOutAlt, FaBars, FaCog, FaCrown, FaStar } from 'react-icons/fa';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo-plantilla.svg';
@@ -17,8 +17,9 @@ export default function AppNavbar() {
   return (
     <>
       {/* Barra de anuncio festiva */}
-      <div className="announcement-bar">
-        🎉 ¡Bienvenidos a <strong>CotiFiesta</strong>! • Cotillón Mayorista & Minorista • Envíos a todo el país • Atención WhatsApp: 11 5555-0000
+      <div className="announcement-bar d-flex align-items-center justify-content-center">
+        <FaStar size={11} className="text-warning me-2" />
+        <span>¡Bienvenidos a <strong>CotiFiesta</strong>! • Cotillón Mayorista & Minorista • Envíos a todo el país • Atención WhatsApp: 11 5555-0000</span>
       </div>
 
       <Navbar expand="lg" className="app-navbar" variant="light">

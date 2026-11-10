@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Container, Row, Col, Button, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaTruck, FaShieldAlt, FaHeadset, FaArrowRight, FaBirthdayCake, FaGift } from 'react-icons/fa';
+import { FaTruck, FaShieldAlt, FaHeadset, FaArrowRight, FaBirthdayCake, FaGift, FaStar } from 'react-icons/fa';
 import api from '../services/api';
 import ProductCard from '../components/ProductCard';
 
@@ -43,10 +43,10 @@ export default function Home() {
         <Container>
           <div className="mx-auto" style={{ maxWidth: '840px' }}>
             <span className="festive-pill mb-3">
-              🎈 Cotillón Mayorista & Minorista
+              <FaGift size={13} className="text-danger me-1" /> Cotillón Mayorista & Minorista
             </span>
             <h1 className="display-4 fw-bold mb-3 tracking-tight" style={{ color: '#0f172a' }}>
-              ¡Todo para que tu Fiesta sea <span style={{ color: 'var(--primary)' }}>Inolvidable</span>! ✨
+              ¡Todo para que tu Fiesta sea <span style={{ color: 'var(--primary)' }}>Inolvidable</span>!
             </h1>
             <p className="lead text-secondary mb-4 mx-auto" style={{ maxWidth: '640px', fontSize: '1.15rem' }}>
               Encuentra los mejores globos, vajilla descartable, bengalas de humo, guirnaldas y artículos de carnaval carioca para tus festejos y eventos.
@@ -184,7 +184,9 @@ export default function Home() {
       <section className="py-5">
         <Container>
           <div className="p-5 rounded-4 text-center position-relative overflow-hidden bg-white border shadow-sm">
-            <span className="display-4 d-block mb-3">🎂 🎈 🥳</span>
+            <div className="p-3 rounded-circle d-inline-flex mb-3 shadow-sm border" style={{ backgroundColor: '#fff1f2', color: '#e11d48' }}>
+              <FaBirthdayCake size={36} />
+            </div>
             <h2 className="display-6 fw-bold mb-3" style={{ color: '#0f172a' }}>¿Planeando un Cumpleaños o Festejo?</h2>
             <p className="text-secondary mx-auto mb-4" style={{ maxWidth: '620px', fontSize: '1.05rem' }}>
               Encuentra los combos de cotillón, globos temáticos, bengalas y vajilla descartable en un solo lugar con despacho inmediato.

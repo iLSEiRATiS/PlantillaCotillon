@@ -42,7 +42,8 @@ import {
   FaCheck,
   FaTimes,
   FaStore,
-  FaCalendarAlt
+  FaCalendarAlt,
+  FaInfoCircle
 } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import { useAuth } from '../context/AuthContext';
@@ -1003,9 +1004,9 @@ export default function Admin() {
                             <td>{stockBadge}</td>
                             <td>
                               {p.activo !== false ? (
-                                <span className="small text-success fw-bold">● Activo</span>
+                                <Badge bg="success" className="px-2 py-1">Activo</Badge>
                               ) : (
-                                <span className="small text-muted fw-bold">○ Inactivo</span>
+                                <Badge bg="secondary" className="px-2 py-1">Inactivo</Badge>
                               )}
                             </td>
                             <td className="text-end">
@@ -1147,9 +1148,13 @@ export default function Admin() {
                               <td>{r._index}</td>
                               <td>
                                 {r.isValid ? (
-                                  <Badge bg="success" pill>✓ Válido</Badge>
+                                  <Badge bg="success" pill className="d-inline-flex align-items-center gap-1">
+                                    <FaCheck size={9} /> Válido
+                                  </Badge>
                                 ) : (
-                                  <Badge bg="danger" pill title={r.error}>⚠️ {r.error}</Badge>
+                                  <Badge bg="danger" pill title={r.error} className="d-inline-flex align-items-center gap-1">
+                                    <FaExclamationTriangle size={9} /> {r.error}
+                                  </Badge>
                                 )}
                               </td>
                               <td className="fw-bold" style={{ color: '#0f172a' }}>{r.nombre || '—'}</td>
@@ -1259,8 +1264,9 @@ export default function Admin() {
                         </Col>
                       </Row>
 
-                      <div className="p-3 rounded-3" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#64748b' }}>
-                        ℹ️ En modo Sandbox puedes probar compras con tarjetas de prueba sin generar cargos reales en Mercado Pago.
+                      <div className="p-3 rounded-3 d-flex align-items-center" style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.82rem', color: '#64748b' }}>
+                        <FaInfoCircle className="text-info me-2 flex-shrink-0" size={15} />
+                        <span>En modo Sandbox puedes probar compras con tarjetas de prueba sin generar cargos reales en Mercado Pago.</span>
                       </div>
                     </div>
                   </Col>
