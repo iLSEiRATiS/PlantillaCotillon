@@ -1,121 +1,97 @@
-// src/components/Footer.jsx
-import { useEffect, useState } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaInstagram, FaEnvelope, FaPhoneAlt, FaArrowUp } from 'react-icons/fa';
+import { FaInstagram, FaWhatsapp, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 
-const Footer = () => {
-  const year = new Date().getFullYear();
-  const [showTop, setShowTop] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setShowTop(window.scrollY > 200);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
 
   return (
-    <>
-      <footer className="footer-modern text-white mt-4 pt-4" role="contentinfo">
-        <Container>
-          <Row className="gy-4 align-items-start footer-main-grid">
-            <Col md={5}>
-              <div className="footer-brand footer-panel">
-                <h5 className="mb-2 text-white fw-bold">PlantillaCotillón</h5>
-                <p className="mb-0 text-white-50 small">
-                  Plantilla de comercio electrónico para cotillón, repostería y ambientación de eventos.
-                  Paleta monocromática moderna, alto rendimiento y arquitectura desacoplada React + Node.js.
-                </p>
-                <div className="mt-3 d-flex gap-3">
-                  <Link to="/productos" className="link-light small text-decoration-none">Catálogo</Link>
-                  <span className="text-muted">•</span>
-                  <Link to="/como-comprar" className="link-light small text-decoration-none">Cómo Comprar</Link>
-                </div>
-              </div>
-            </Col>
-
-            <Col md={4}>
-              <div className="footer-panel">
-              <h6 className="text-uppercase fw-semibold small mb-3 text-white-50">Contacto</h6>
-              <ul className="list-unstyled mb-0 small footer-contact">
-                <li className="d-flex align-items-center">
-                  <span className="footer-icon" aria-hidden>
-                    <FaEnvelope />
-                  </span>
-                  <a
-                    href="mailto:ventascotistore@gmail.com"
-                    className="link-light text-decoration-none"
-                  >
-                    ventascotistore@gmail.com
-                  </a>
-                </li>
-                <li className="d-flex align-items-center mt-2">
-                  <span className="footer-icon" aria-hidden>
-                    <FaPhoneAlt />
-                  </span>
-                  <a href="tel:+541150443472" className="link-light text-decoration-none">
-                    11 5044-3472
-                  </a>
-                </li>
-              </ul>
-              </div>
-            </Col>
-
-            <Col md={3}>
-              <div className="footer-panel">
-              <h6 className="text-uppercase fw-semibold small mb-3 text-white-50">Seguinos</h6>
-              <div className="d-flex flex-column gap-2">
-                <a
-                  href="https://www.instagram.com/cotistore_mayorista"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="footer-social footer-social-icon"
-                  aria-label="Instagram de CotiStore (se abre en una pestaña nueva)"
-                >
-                  <span className="footer-icon" aria-hidden>
-                    <FaInstagram />
-                  </span>
-                </a>
-              </div>
-              </div>
-            </Col>
-          </Row>
-
-          <div className="footer-divider" />
-
-          <div className="footer-legal-wrap pb-2">
-            <small className="text-white-50 footer-legal-copy">
-              © {year} PlantillaCotillón — Todos los derechos reservados.
-            </small>
-            <div className="footer-legal-links">
-              <Link to="/terminos-y-condiciones" className="footer-legal-link">
-                Términos y condiciones
-              </Link>
-              <Link to="/privacidad" className="footer-legal-link">
-                Privacidad
-              </Link>
+    <footer className="app-footer mt-auto">
+      <Container>
+        <Row className="gy-4 justify-content-between">
+          <Col lg={4} md={6}>
+            <div className="mb-3">
+              <h5 className="fw-bold text-white mb-2">PlantillaCotillón</h5>
+              <p className="text-muted small lh-base" style={{ maxWidth: '340px' }}>
+                Plantilla modular de e-commerce moderna para tiendas de cotillón, eventos y ambientación.
+                Diseñada con arquitectura React 18 y backend nativo Node.js Express.
+              </p>
             </div>
-          </div>
-        </Container>
-      </footer>
+            <div className="d-flex gap-3 text-white">
+              <a href="https://instagram.com" target="_blank" rel="noreferrer" className="text-muted hover-white">
+                <FaInstagram size={18} />
+              </a>
+              <a href="https://whatsapp.com" target="_blank" rel="noreferrer" className="text-muted hover-white">
+                <FaWhatsapp size={18} />
+              </a>
+              <a href="mailto:info@cotillon.com" className="text-muted hover-white">
+                <FaEnvelope size={18} />
+              </a>
+            </div>
+          </Col>
 
-      {showTop && (
-        <button
-          type="button"
-          onClick={scrollTop}
-          aria-label="Subir al inicio"
-          className="btn btn-primary shadow position-fixed"
-          style={{ right: 16, bottom: 16, borderRadius: '9999px', width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1050 }}
-        >
-          <FaArrowUp />
-        </button>
-      )}
-    </>
+          <Col lg={2} sm={6}>
+            <h6 className="text-white fw-bold mb-3 small text-uppercase tracking-wider">Explorar</h6>
+            <ul className="list-unstyled d-flex flex-column gap-2 small">
+              <li>
+                <Link to="/" className="text-muted hover-white">Inicio</Link>
+              </li>
+              <li>
+                <Link to="/catalogo" className="text-muted hover-white">Catálogo Completo</Link>
+              </li>
+              <li>
+                <Link to="/como-comprar" className="text-muted hover-white">¿Cómo Comprar?</Link>
+              </li>
+              <li>
+                <Link to="/pedidos" className="text-muted hover-white">Mis Pedidos</Link>
+              </li>
+            </ul>
+          </Col>
+
+          <Col lg={3} sm={6}>
+            <h6 className="text-white fw-bold mb-3 small text-uppercase tracking-wider">Categorías</h6>
+            <ul className="list-unstyled d-flex flex-column gap-2 small">
+              <li>
+                <Link to="/catalogo?cat=globos-arreglos" className="text-muted hover-white">Globos & Inflables</Link>
+              </li>
+              <li>
+                <Link to="/catalogo?cat=vajilla-deco-mesa" className="text-muted hover-white">Vajilla Descartable</Link>
+              </li>
+              <li>
+                <Link to="/catalogo?cat=velas-bengalas" className="text-muted hover-white">Velas & Bengalas</Link>
+              </li>
+              <li>
+                <Link to="/catalogo?cat=guirnaldas-banners" className="text-muted hover-white">Guirnaldas & Fondos</Link>
+              </li>
+            </ul>
+          </Col>
+
+          <Col lg={3} md={6}>
+            <h6 className="text-white fw-bold mb-3 small text-uppercase tracking-wider">Contacto & Retiros</h6>
+            <div className="d-flex flex-column gap-2 small text-muted">
+              <div className="d-flex align-items-center gap-2">
+                <FaMapMarkerAlt />
+                <span>Depósito Central - Buenos Aires, Argentina</span>
+              </div>
+              <div className="d-flex align-items-center gap-2">
+                <FaWhatsapp />
+                <span>+54 9 11 5555-0000</span>
+              </div>
+              <div className="d-flex align-items-center gap-2">
+                <FaEnvelope />
+                <span>ventas@plantillacotillon.com</span>
+              </div>
+            </div>
+          </Col>
+        </Row>
+
+        <hr className="my-4 border-secondary opacity-25" />
+
+        <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 small text-dim">
+          <span>© {currentYear} PlantillaCotillón. Todos los derechos reservados.</span>
+          <span>Desarrollado con arquitectura moderna desacoplada.</span>
+        </div>
+      </Container>
+    </footer>
   );
-};
-
-export default Footer;
-
+}

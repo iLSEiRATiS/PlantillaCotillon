@@ -1,142 +1,136 @@
 import { useEffect, useState } from 'react';
-import { Card, Table, Alert, Spinner, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Badge, Spinner, Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
+import { FaBoxOpen, FaShoppingBag } from 'react-icons/fa';
+import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import api from '../lib/api';
 
-const STATUS_LABELS = {
-  created: 'A procesar',
-  approved: 'Aprobado',
-  review: 'A revisar',
-  paid: 'Pagado',
-  shipped: 'A entregar',
-  delivered: 'Entregado',
-  cancelled: 'Cancelado',
+const formatMoney = (val) =>
+  new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val || 0);
+
+const statusLabels = {
+  created: { text: 'A procesar', bg: 'secondary' },
+  review: { text: 'A revisar', bg: 'secondary' },
+  shipped: { text: 'A entregar', bg: 'light', textDark: true },
+  paid: { text: 'Pagado', bg: 'light', textDark: true },
+  delivered: { text: 'Entregado', bg: 'light', textDark: true },
+  cancelled: { text: 'Cancelado', bg: 'danger' },
 };
 
 export default function Orders() {
-  const { token, user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { token, isLoggedIn } = useAuth();
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState('');
-  const [rows, setRows] = useState([]);
-  const [downloadingId, setDownloadingId] = useState(null);
-
-  const handleAuthError = (error) => {
-    if (!error?.isAuthError) return false;
-    logout?.();
-    navigate('/login?redirect=/orders', { replace: true });
-    return true;
-  };
-
-  const translateStatus = (raw) => {
-    const s = (raw || '').trim().toLowerCase();
-    const direct = STATUS_LABELS[s];
-    if (direct) return direct;
-    if (s.includes('approve')) return 'Aprobado';
-    if (s.includes('create')) return 'Creado';
-    if (s.includes('pay')) return 'Pagado';
-    if (s.includes('ship')) return 'Enviado';
-    if (s.includes('deliver')) return 'Entregado';
-    if (s.includes('cancel')) return 'Cancelado';
-    return raw || '-';
-  };
 
   useEffect(() => {
-    let alive = true;
-    async function run() {
-      setErr(''); setLoading(true);
+    async function fetchOrders() {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
-        const data = await api.orders.mine(token);
-        if (alive) setRows(Array.isArray(data?.orders) ? data.orders : []);
-      } catch (e) {
-        if (handleAuthError(e)) return;
-        if (alive) setErr(e?.message || 'No se pudieron cargar los pedidos');
+        const data = await api.getMyOrders(token);
+        setOrders(data.items || data.orders || []);
+      } catch (err) {
+        console.error('Error cargando pedidos:', err);
       } finally {
-        if (alive) setLoading(false);
+        setLoading(false);
       }
     }
-    if (token) run();
-    return () => { alive = false; };
+    fetchOrders();
   }, [token]);
 
-  const downloadOrderPdf = async (order) => {
-    const oid = order?.id || order?._id;
-    if (!oid) return;
-    try {
-      setDownloadingId(String(oid));
-      const blob = await api.orders.downloadPdf(token, oid);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `pedido-${oid}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (e) {
-      if (handleAuthError(e)) return;
-      window.alert(e?.message || 'No se pudo descargar el PDF');
-    } finally {
-      setDownloadingId(null);
-    }
-  };
+  if (!isLoggedIn) {
+    return (
+      <Container className="py-5 text-center my-auto">
+        <div className="p-5 rounded-4 bg-surface-card border border-secondary border-opacity-25 mx-auto" style={{ maxWidth: '480px' }}>
+          <FaBoxOpen size={48} className="text-dim mb-3" />
+          <h4 className="text-white fw-bold mb-2">Inicia Sesión</h4>
+          <p className="text-muted small mb-4">Debes estar logueado para consultar tu historial de pedidos.</p>
+          <Button as={Link} to="/login" className="btn-monochrome px-4 py-2">
+            Iniciar Sesión
+          </Button>
+        </div>
+      </Container>
+    );
+  }
 
-  if (!user) return null;
+  if (loading) {
+    return (
+      <div className="text-center py-5 my-5">
+        <Spinner animation="border" variant="light" />
+        <p className="text-muted small mt-2">Cargando tus pedidos...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="container my-4">
-      <Card>
-        <Card.Header><strong>Mis pedidos</strong></Card.Header>
-        <Card.Body>
-          {err && <Alert variant="danger" className="mb-3">{err}</Alert>}
-          {loading ? (
-            <div className="text-center py-5"><Spinner animation="border" /></div>
-          ) : (
-            <Table striped bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Items</th>
-                  <th>Monto</th>
-                  <th>Estado</th>
-                  <th>Fecha</th>
-                  <th>Comprobante</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map(o => {
-                  const raw = (o.status || '').toLowerCase();
-                  const label = STATUS_LABELS[raw] || o.statusLabel || translateStatus(o.status);
-                  const oid = o.id || o._id;
-                  return (
-                    <tr key={oid}>
-                      <td>{oid}</td>
-                      <td>{o.totals?.items}</td>
-                      <td>${o.totals?.amount?.toFixed ? o.totals.amount.toFixed(2) : o.totals?.amount}</td>
-                      <td>{label || (o.status || '').toLowerCase()}</td>
-                      <td>{new Date(o.createdAt).toLocaleString()}</td>
-                      <td>
-                        <Button
-                          size="sm"
-                          variant="outline-secondary"
-                          disabled={downloadingId === String(oid)}
-                          onClick={() => downloadOrderPdf(o)}
-                        >
-                          {downloadingId === String(oid) ? 'Descargando...' : 'Descargar PDF'}
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {rows.length === 0 && (
-                  <tr><td colSpan={6} className="text-center py-3">Sin pedidos.</td></tr>
-                )}
-              </tbody>
-            </Table>
-          )}
-        </Card.Body>
-      </Card>
+    <div className="py-5">
+      <Container>
+        <div className="mb-4">
+          <span className="text-dim small text-uppercase fw-bold tracking-wider">Historial</span>
+          <h1 className="h2 fw-bold text-white mb-1">Mis Pedidos</h1>
+          <p className="text-muted small mb-0">Revisa el estado de tus compras y solicitudes de cotillón.</p>
+        </div>
+
+        {orders.length === 0 ? (
+          <div className="p-5 text-center bg-surface-card rounded-4 border border-secondary border-opacity-25">
+            <FaShoppingBag size={48} className="text-dim mb-3" />
+            <h5 className="text-white fw-bold mb-2">Aún no tienes pedidos registrados</h5>
+            <p className="text-muted small mb-4">Cuando realices una compra, podrás seguir el estado de la entrega aquí.</p>
+            <Button as={Link} to="/catalogo" className="btn-monochrome px-4 py-2">
+              Explorar Catálogo
+            </Button>
+          </div>
+        ) : (
+          <div className="d-flex flex-column gap-3">
+            {orders.map((ord) => {
+              const statusObj = statusLabels[ord.status] || { text: ord.status, bg: 'secondary' };
+              const dateStr = ord.creado_en
+                ? new Date(ord.creado_en).toLocaleDateString('es-AR', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                : 'Fecha reciente';
+
+              return (
+                <div key={ord.id} className="p-4 rounded-3 bg-surface-card border border-secondary border-opacity-25">
+                  <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                      <span className="h5 fw-bold text-white mb-0 me-3">Orden #{ord.id}</span>
+                      <span className="text-dim small">{dateStr}</span>
+                    </div>
+                    <Badge bg={statusObj.bg} text={statusObj.textDark ? 'dark' : 'white'} className="px-3 py-2 text-uppercase">
+                      {statusObj.text}
+                    </Badge>
+                  </div>
+
+                  <div className="p-3 rounded-2 bg-surface border border-secondary border-opacity-25 mb-3">
+                    <div className="row g-2 small text-muted">
+                      <div className="col-sm-4"><strong>Destinatario:</strong> {ord.nombre}</div>
+                      <div className="col-sm-4"><strong>Destino:</strong> {ord.direccion}, {ord.ciudad}</div>
+                      <div className="col-sm-4"><strong>Total:</strong> <span className="text-white fw-bold">{formatMoney(ord.total)}</span></div>
+                    </div>
+                  </div>
+
+                  {ord.items && ord.items.length > 0 && (
+                    <div className="d-flex flex-wrap gap-2 small text-dim">
+                      {ord.items.map((it, idx) => (
+                        <span key={idx} className="p-1 px-2 rounded bg-surface border border-secondary border-opacity-25">
+                          {it.cantidad}x {it.product_name} ({formatMoney(it.precio_unitario)})
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Container>
     </div>
   );
 }

@@ -1,97 +1,70 @@
-// src/components/ProductCard.jsx
 import { Card, Button } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useStoreConfig } from '../context/StoreConfigContext';
-import { API_BASE } from '../lib/api';
+import { Link } from 'react-router-dom';
+import { FaPlus, FaCheck } from 'react-icons/fa';
+import { useState } from 'react';
+import { useCart } from '../context/CartContext';
 
-const money = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
+const formatMoney = (val) =>
+  new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(val || 0);
 
-const ProductCard = ({ product, onAdd }) => {
-  const { isLoggedIn } = useAuth();
-  const { config: storeConfig } = useStoreConfig();
-  const navigate = useNavigate();
+export default function ProductCard({ product }) {
+  const { addToCart } = useCart();
+  const [added, setAdded] = useState(false);
 
-  const isSinStock = product.sin_stock === true || product.sinStock === true;
-  const nombre = product.nombre || product.name || 'Producto';
-  const precio = (product.precio !== undefined && product.precio !== null) ? product.precio : (product.price || 0);
-  const categoria = product.categoria || product.category?.name || '-';
-  let imagen =
-    product.imagen ||
-    product.image_url ||
+  const id = product.id || product._id || product.slug;
+  const name = product.nombre || product.name || 'Artículo de Cotillón';
+  const price = product.precio !== undefined ? product.precio : (product.price || 0);
+  const categoryName = product.categoria?.nombre || product.category?.name || 'Cotillón';
+  const image =
     product.imageUrl ||
+    product.image_url ||
     (Array.isArray(product.images) && product.images[0]) ||
-    `https://placehold.co/600x400?text=${encodeURIComponent(nombre)}`;
-  if (typeof imagen === 'string' && imagen.startsWith('/')) {
-    imagen = `${API_BASE}${imagen}`;
-  }
-  const id = product.id || product._id || product.slug || '';
+    'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&auto=format&fit=crop&q=80';
+
+  const handleAdd = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product, 1);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
+  };
 
   return (
-    <Card className="h-100 product-card shadow-sm">
-      <div className="product-img-wrap position-relative">
-        <Card.Img
-          variant="top"
-          src={imagen}
-          alt={nombre}
-          className="object-fit-cover"
-        />
-        <span className="badge badge-category">{categoria}</span>
-        {isSinStock && (
-          <div
-            className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-            style={{ backgroundColor: 'rgba(0,0,0,0.4)', color: '#fff', fontWeight: 'bold', fontSize: '1.2rem' }}
-          >
-            SIN STOCK
-          </div>
-        )}
+    <Card as={Link} to={`/producto/${id}`} className="custom-card h-100 text-decoration-none">
+      <div className="card-img-wrapper">
+        <img src={image} alt={name} loading="lazy" />
+        <span className="card-badge">{categoryName}</span>
       </div>
 
-      <Card.Body className="d-flex flex-column">
-        <Card.Title className="mb-1 text-truncate" title={nombre}>
-          {nombre}
-        </Card.Title>
-        <div className="text-muted small mb-2">ID: {id}</div>
+      <Card.Body className="d-flex flex-column p-3">
+        <h6 className="text-white fw-bold mb-1 text-truncate" title={name}>
+          {name}
+        </h6>
+        <p className="text-dim small mb-3 text-truncate">
+          {product.descripcion || product.description || 'Artículo de ambientación y fiesta.'}
+        </p>
 
-        {/* --- Control de sesión --- */}
-        {(!isLoggedIn && !storeConfig?.showPricesToGuests) ? (
-          <div className="mt-auto text-center text-muted small border rounded py-3 px-2">
-            <p className="mb-2" style={{ fontStyle: 'italic' }}>
-              Iniciá sesión para ver precios y comprar
-            </p>
-            <Button variant="outline-primary" size="sm" onClick={() => navigate('/login')}>
-              Iniciar sesión
-            </Button>
-          </div>
-        ) : (
-          <>
-            <div className="fw-bold mb-3">{money.format(precio)}</div>
-            {isLoggedIn ? (
-              isSinStock ? (
-                <Button className="mt-auto w-100" variant="secondary" disabled>
-                  Sin stock
-                </Button>
-              ) : (
-                <Button className="mt-auto w-100" variant="primary" onClick={() => onAdd(product)}>
-                  Agregar al carrito
-                </Button>
-              )
+        <div className="mt-auto d-flex align-items-center justify-content-between pt-2 border-top border-secondary border-opacity-25">
+          <span className="h5 fw-bold text-white mb-0">{formatMoney(price)}</span>
+
+          <Button
+            size="sm"
+            className={added ? 'btn-monochrome-outline' : 'btn-monochrome'}
+            onClick={handleAdd}
+            aria-label="Agregar al carrito"
+          >
+            {added ? (
+              <span className="d-flex align-items-center gap-1 small">
+                <FaCheck /> Listo
+              </span>
             ) : (
-              <div className="mt-auto text-center text-muted small border rounded py-2 px-2">
-                <p className="mb-2" style={{ fontStyle: 'italic' }}>
-                  Iniciá sesión para comprar
-                </p>
-                <Button variant="outline-primary" size="sm" onClick={() => navigate('/login')}>
-                  Iniciar sesión
-                </Button>
-              </div>
+              <span className="d-flex align-items-center gap-1 small">
+                <FaPlus size={10} /> Agregar
+              </span>
             )}
-          </>
-        )}
+          </Button>
+        </div>
       </Card.Body>
     </Card>
   );
-};
-
-export default ProductCard;
-
+}

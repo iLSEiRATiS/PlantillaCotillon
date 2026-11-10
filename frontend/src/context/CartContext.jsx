@@ -1,157 +1,99 @@
-// src/context/CartContext.jsx
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { useAuth } from './AuthContext';
+import { createContext, useContext, useState, useEffect } from 'react';
 
-const CartCtx = createContext(null);
+const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
-  const { token, user, loading } = useAuth();
-  const [cartItems, setCartItems] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('cart_items') || '[]'); } catch { return []; }
-  });
-  const [cartNotice, setCartNotice] = useState(null);
-
-  const userKey = user?.id || user?._id || user?.pk || null;
-
-  const persist = (items) => {
-    setCartItems(items);
-    localStorage.setItem('cart_items', JSON.stringify(items));
-    if (userKey) localStorage.setItem(`cart_items_${userKey}`, JSON.stringify(items));
-  };
-
-  // Cuando el usuario cambia, cargamos su carrito guardado; si no hay usuario, vaciamos el carrito visible.
-  useEffect(() => {
-    if (userKey) {
-      try {
-        const stored = localStorage.getItem(`cart_items_${userKey}`);
-        if (stored) {
-          setCartItems(JSON.parse(stored));
-          return;
-        }
-      } catch { /* ignore */ }
-      try {
-        const fallback = localStorage.getItem('cart_items');
-        setCartItems(fallback ? JSON.parse(fallback) : []);
-      } catch {
-        setCartItems([]);
-      }
-    } else if (!token && !loading) {
-      setCartItems([]);
-      localStorage.setItem('cart_items', '[]');
+  const [items, setItems] = useState(() => {
+    try {
+      const stored = localStorage.getItem('cotillon_cart');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
     }
-  }, [userKey, token, loading]);
+  });
 
-  const findIndex = (id) => cartItems.findIndex(i => String(i.id || i._id) === String(id));
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const buildAttributesKey = (attrs = {}) => {
-    const entries = Object.entries(attrs || {})
-      .map(([k, v]) => {
-        const val = Array.isArray(v) ? v.join(',') : v;
-        return `${k}:${val}`;
-      })
-      .sort();
-    return entries.join('|');
-  };
-
-  const canBuy = !loading;
+  useEffect(() => {
+    localStorage.setItem('cotillon_cart', JSON.stringify(items));
+  }, [items]);
 
   const addToCart = (product, qty = 1, attributes = {}) => {
-    const cantidad = Math.max(1, Number(qty) || 1);
-    const resolvedProductId =
-      product.productId ||
-      product.sourceProductId ||
-      product.realProductId ||
-      product._realProductId ||
-      product.id ||
-      product._id;
-    const baseId = product.id || product._id || `${product.categoria}-${product.nombre}`;
-    const attrsKey = buildAttributesKey(attributes);
-    const id = attrsKey ? `${baseId}::${attrsKey}` : baseId;
-    const idx = findIndex(id);
-    if (idx >= 0) {
-      const copy = [...cartItems];
-      copy[idx] = { ...copy[idx], cantidad: (copy[idx].cantidad || 1) + cantidad };
-      persist(copy);
-    } else {
-      persist([...cartItems, {
-        id,
-        productId: String(resolvedProductId || baseId),
-        nombre: product.nombre || product.name || 'Producto',
-        precio: Number(product.precio ?? product.price ?? 0),
-        imagen: product.imagen || '',
-        cantidad,
-        atributos: attributes
-      }]);
-    }
-    setCartNotice({
-      id: Date.now(),
-      tone: 'success',
-      title: 'Agregado al carrito',
-      productName: product.nombre || product.name || 'Producto',
-      message: 'El producto se cargo satisfactoriamente.',
-    });
-  };
+    const quantity = Math.max(1, parseInt(qty, 10) || 1);
+    const productId = product.id || product._id;
+    const price = parseFloat(product.price || product.precio || 0);
+    const name = product.name || product.nombre || 'Producto';
+    const imageUrl = product.imageUrl || product.image_url || (Array.isArray(product.images) ? product.images[0] : '');
 
-  const dismissCartNotice = () => setCartNotice(null);
+    setItems((prev) => {
+      const existingIndex = prev.findIndex((item) => String(item.id) === String(productId));
+      if (existingIndex > -1) {
+        const updated = [...prev];
+        updated[existingIndex].quantity += quantity;
+        return updated;
+      }
+      return [
+        ...prev,
+        {
+          id: productId,
+          name,
+          price,
+          imageUrl,
+          quantity,
+          attributes,
+        },
+      ];
+    });
+
+    setIsCartOpen(true);
+  };
 
   const removeFromCart = (id) => {
-    const removedItem = cartItems.find(it => String(it.id) === String(id));
-    persist(cartItems.filter(it => String(it.id) !== String(id)));
-    if (removedItem) {
-      setCartNotice({
-        id: Date.now(),
-        tone: 'danger',
-        title: 'Eliminado del carrito',
-        productName: removedItem.nombre || 'Producto',
-        message: 'El producto se elimino satisfactoriamente.',
-      });
+    setItems((prev) => prev.filter((item) => String(item.id) !== String(id)));
+  };
+
+  const updateQuantity = (id, newQty) => {
+    const q = parseInt(newQty, 10);
+    if (q <= 0) {
+      removeFromCart(id);
+      return;
     }
+    setItems((prev) =>
+      prev.map((item) => (String(item.id) === String(id) ? { ...item, quantity: q } : item))
+    );
   };
 
-  const clearCart = () => persist([]);
-
-  const updateQuantity = (id, cantidad) => {
-    const idx = findIndex(id);
-    if (idx < 0) return;
-    const qty = Math.max(1, Number(cantidad) || 1);
-    const copy = [...cartItems];
-    copy[idx] = { ...copy[idx], cantidad: qty };
-    persist(copy);
+  const clearCart = () => {
+    setItems([]);
   };
 
-  const increaseQuantity = (id) => updateQuantity(id, (cartItems[findIndex(id)]?.cantidad || 1) + 1);
+  const getTotalItems = () => items.reduce((sum, item) => sum + item.quantity, 0);
+  const getSubtotal = () => items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const decreaseQuantity = (id) => updateQuantity(id, Math.max(1, (cartItems[findIndex(id)]?.cantidad || 1) - 1));
-
-  const setQuantity = (id, qty) => updateQuantity(id, qty);
-
-  const getTotalItems = () =>
-    cartItems.reduce((acc, it) => acc + (it.cantidad || 1), 0);
-
-  const getTotalPrice = () =>
-    cartItems.reduce((acc, it) => acc + Number(it.precio ?? it.price ?? 0) * (it.cantidad || 1), 0);
-
-  const value = useMemo(() => ({
-    cartItems,
-    addToCart,
-    removeFromCart,
-    clearCart,
-    updateQuantity,
-    increaseQuantity,
-    decreaseQuantity,
-    setQuantity,
-    getTotalItems,
-    getTotalPrice,
-    canBuy,
-    cartNotice,
-    dismissCartNotice,
-  }), [cartItems, canBuy, cartNotice]);
-
-  return <CartCtx.Provider value={value}>{children}</CartCtx.Provider>;
+  return (
+    <CartContext.Provider
+      value={{
+        items,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        getTotalItems,
+        getSubtotal,
+        isCartOpen,
+        openCart: () => setIsCartOpen(true),
+        closeCart: () => setIsCartOpen(false),
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
 }
 
 export function useCart() {
-  const ctx = useContext(CartCtx);
-  if (!ctx) throw new Error('useCart debe usarse dentro de <CartProvider>');
-  return ctx;
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error('useCart debe usarse dentro de un CartProvider');
+  }
+  return context;
 }

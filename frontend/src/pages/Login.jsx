@@ -1,112 +1,84 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Card, Form, Button, Alert, Spinner, InputGroup } from 'react-bootstrap';
-import { BsEyeFill, BsEyeSlashFill } from 'react-icons/bs';
-import api from '../lib/api';
+import { useState } from 'react';
+import { Container, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaUserLock } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
-import Seo from '../components/Seo';
-
-const getSafeRedirect = (search, origin) => {
-  const candidate = new URLSearchParams(search).get('redirect') || '/';
-  try {
-    const resolved = new URL(candidate, origin);
-    if (resolved.origin !== origin) return '/';
-    return resolved.pathname + resolved.search + resolved.hash;
-  } catch {
-    return '/';
-  }
-};
 
 export default function Login() {
+  const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [email, setEmail] = useState('');
+
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState('');
-  const redirect = useMemo(() => getSafeRedirect(location.search, window.location.origin), [location.search]);
+  const [error, setError] = useState(null);
 
-  const { login, isLoggedIn, user } = useAuth();
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      if (user?.must_change_password) {
-        navigate('/account', { replace: true });
-      } else {
-        navigate(redirect, { replace: true });
-      }
-    }
-  }, [isLoggedIn, navigate, redirect, user]);
-
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setErr('');
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      const data = await api.auth.login({ email, password });
-      if (!data?.token || !data?.user) throw new Error('Respuesta invalida');
-      login({ token: data.token, user: data.user });
-      if (data.user?.must_change_password) {
-        navigate('/account', { replace: true });
-      } else {
-        navigate(redirect, { replace: true });
-      }
-    } catch (e2) {
-      setErr(e2?.message || 'No se pudo iniciar sesion');
+      await login({ email: identifier, username: identifier, password });
+      navigate('/catalogo');
+    } catch (err) {
+      setError(err.message || 'Error al iniciar sesión. Revisa tus credenciales.');
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <>
-      <Seo title="Iniciar sesion" description="Acceso a cuenta de clientes de CotiStore." path="/login" noindex />
-      <div className="container my-5" style={{ maxWidth: 500 }}>
-        <Card>
-          <Card.Body>
-            <h4 className="mb-3">Iniciar sesion</h4>
-            {err && <Alert variant="danger">{err}</Alert>}
-            <Form onSubmit={handleSubmit}>
-              <Form.Group className="mb-3" controlId="email">
-                <Form.Label>Email</Form.Label>
-                <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="password">
-                <Form.Label>Contrasena</Form.Label>
-                <InputGroup>
-                  <Form.Control
-                    type={showPass ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <Button
-                    variant="outline-secondary"
-                    type="button"
-                    onClick={() => setShowPass((v) => !v)}
-                    aria-label={showPass ? 'Ocultar contrasena' : 'Mostrar contrasena'}
-                  >
-                    {showPass ? <BsEyeSlashFill /> : <BsEyeFill />}
-                  </Button>
-                </InputGroup>
-              </Form.Group>
-              <Button type="submit" disabled={loading} className="w-100">
-                {loading ? <Spinner size="sm" animation="border" /> : 'Ingresar'}
-              </Button>
-            </Form>
-            <div className="mt-2 text-end">
-              <Link to="/forgot-password">Olvide mi contrasena</Link>
+    <div className="py-5 my-auto">
+      <Container style={{ maxWidth: '440px' }}>
+        <div className="p-4 p-sm-5 rounded-4 bg-surface-card border border-secondary border-opacity-25 shadow-lg">
+          <div className="text-center mb-4">
+            <div className="p-3 rounded-circle bg-surface border border-secondary text-white d-inline-flex mb-3">
+              <FaUserLock size={24} />
             </div>
-            <div className="mt-3 text-center">
-              No tienes cuenta? <Link to="/register">Registrate</Link>
+            <h2 className="h4 fw-bold text-white mb-1">Iniciar Sesión</h2>
+            <p className="text-muted small mb-0">Accede para gestionar tus pedidos y compras.</p>
+          </div>
+
+          {error && <Alert variant="danger" className="py-2 small mb-3">{error}</Alert>}
+
+          <Form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <Form.Label className="small text-muted">Email o Usuario</Form.Label>
+              <Form.Control
+                className="form-control-custom"
+                required
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="admin@cotillon.com"
+              />
             </div>
-            <div className="mt-2 text-center text-muted small">
-              Los nuevos registros requieren aprobación del administrador.
+
+            <div className="mb-4">
+              <Form.Label className="small text-muted">Contraseña</Form.Label>
+              <Form.Control
+                type="password"
+                className="form-control-custom"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
             </div>
-          </Card.Body>
-        </Card>
-      </div>
-    </>
+
+            <Button type="submit" className="btn-monochrome w-100 py-2 fw-bold mb-3" disabled={loading}>
+              {loading ? <Spinner animation="border" size="sm" /> : 'Ingresar'}
+            </Button>
+
+            <div className="text-center">
+              <span className="text-muted small">¿No tienes cuenta? </span>
+              <Link to="/registro" className="text-white small fw-bold text-decoration-none hover-white">
+                Regístrate aquí
+              </Link>
+            </div>
+          </Form>
+        </div>
+      </Container>
+    </div>
   );
 }

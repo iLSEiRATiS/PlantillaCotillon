@@ -1,122 +1,133 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Card, Form, Button, Alert, Spinner, InputGroup } from 'react-bootstrap';
-import { BsEyeFill, BsEyeSlashFill } from 'react-icons/bs';
-import api from '../lib/api';
+import { useState } from 'react';
+import { Container, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaUserPlus } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
-const getSafeRedirect = (search, origin) => {
-  const candidate = new URLSearchParams(search).get('redirect') || '/';
-  try {
-    const resolved = new URL(candidate, origin);
-    if (resolved.origin !== origin) return '/';
-    return resolved.pathname + resolved.search + resolved.hash;
-  } catch {
-    return '/';
-  }
-};
-
 export default function Register() {
+  const { register } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [documentNumber, setDocumentNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPass, setShowPass] = useState(false);
+
+  const [form, setForm] = useState({
+    username: '',
+    email: '',
+    password: '',
+    first_name: '',
+    last_name: '',
+  });
   const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState('');
-  const [notice, setNotice] = useState('');
-  const redirect = useMemo(() => getSafeRedirect(location.search, window.location.origin), [location.search]);
+  const [error, setError] = useState(null);
 
-  const { login, isLoggedIn } = useAuth();
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  useEffect(() => {
-    if (isLoggedIn) navigate(redirect, { replace: true });
-  }, [isLoggedIn, navigate, redirect]);
-
-  async function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setErr('');
-    setNotice('');
+    setLoading(true);
+    setError(null);
+
     try {
-      setLoading(true);
-      const data = await api.auth.register({ firstName, lastName, documentNumber, email, password });
-      if (data?.token && data?.user) {
-        login({ token: data.token, user: data.user });
-        navigate(redirect, { replace: true });
-        return;
-      }
-      if (data?.pending) {
-        setNotice(data?.detail || 'Cuenta creada. Espera aprobacion del administrador.');
-        setFirstName('');
-        setLastName('');
-        setDocumentNumber('');
-        setEmail('');
-        setPassword('');
-        return;
-      }
-      throw new Error(data?.detail || 'Respuesta invalida');
-    } catch (e) {
-      setErr(e?.message || 'No se pudo registrar');
+      await register(form);
+      navigate('/catalogo');
+    } catch (err) {
+      setError(err.message || 'Error al crear la cuenta. Intenta nuevamente.');
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="container my-5" style={{ maxWidth: 500 }}>
-      <Card>
-        <Card.Body>
-          <h4 className="mb-3">Crear cuenta</h4>
-          {err && <Alert variant="danger">{err}</Alert>}
-          {notice && <Alert variant="info">{notice}</Alert>}
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3" controlId="firstName">
-              <Form.Label>Nombre</Form.Label>
-              <Form.Control value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="lastName">
-              <Form.Label>Apellido</Form.Label>
-              <Form.Control value={lastName} onChange={(e) => setLastName(e.target.value)} required />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="documentNumber">
-              <Form.Label>DNI/CUIL</Form.Label>
-              <Form.Control value={documentNumber} onChange={(e) => setDocumentNumber(e.target.value)} required />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="email">
-              <Form.Label>Email</Form.Label>
-              <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </Form.Group>
-            <Form.Group className="mb-3" controlId="password">
-              <Form.Label>Contraseña</Form.Label>
-              <InputGroup>
-                <Form.Control
-                  type={showPass ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <Button
-                  variant="outline-secondary"
-                  type="button"
-                  onClick={() => setShowPass(v => !v)}
-                  aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                >
-                  {showPass ? <BsEyeSlashFill /> : <BsEyeFill />}
-                </Button>
-              </InputGroup>
-            </Form.Group>
-            <Button type="submit" disabled={loading} className="w-100">
-              {loading ? <Spinner size="sm" animation="border" /> : 'Registrarme'}
-            </Button>
-          </Form>
-          <div className="mt-3 text-center">
-            ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+    <div className="py-5 my-auto">
+      <Container style={{ maxWidth: '480px' }}>
+        <div className="p-4 p-sm-5 rounded-4 bg-surface-card border border-secondary border-opacity-25 shadow-lg">
+          <div className="text-center mb-4">
+            <div className="p-3 rounded-circle bg-surface border border-secondary text-white d-inline-flex mb-3">
+              <FaUserPlus size={24} />
+            </div>
+            <h2 className="h4 fw-bold text-white mb-1">Crear Cuenta</h2>
+            <p className="text-muted small mb-0">Regístrate para guardar tus pedidos y agilizar tus compras.</p>
           </div>
-        </Card.Body>
-      </Card>
+
+          {error && <Alert variant="danger" className="py-2 small mb-3">{error}</Alert>}
+
+          <Form onSubmit={handleSubmit}>
+            <div className="row g-2 mb-3">
+              <div className="col-6">
+                <Form.Label className="small text-muted">Nombre</Form.Label>
+                <Form.Control
+                  className="form-control-custom"
+                  required
+                  name="first_name"
+                  value={form.first_name}
+                  onChange={handleChange}
+                  placeholder="Carlos"
+                />
+              </div>
+              <div className="col-6">
+                <Form.Label className="small text-muted">Apellido</Form.Label>
+                <Form.Control
+                  className="form-control-custom"
+                  required
+                  name="last_name"
+                  value={form.last_name}
+                  onChange={handleChange}
+                  placeholder="López"
+                />
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <Form.Label className="small text-muted">Nombre de Usuario</Form.Label>
+              <Form.Control
+                className="form-control-custom"
+                required
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                placeholder="carlos_eventos"
+              />
+            </div>
+
+            <div className="mb-3">
+              <Form.Label className="small text-muted">Email</Form.Label>
+              <Form.Control
+                type="email"
+                className="form-control-custom"
+                required
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="carlos@ejemplo.com"
+              />
+            </div>
+
+            <div className="mb-4">
+              <Form.Label className="small text-muted">Contraseña</Form.Label>
+              <Form.Control
+                type="password"
+                className="form-control-custom"
+                required
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Mínimo 6 caracteres"
+              />
+            </div>
+
+            <Button type="submit" className="btn-monochrome w-100 py-2 fw-bold mb-3" disabled={loading}>
+              {loading ? <Spinner animation="border" size="sm" /> : 'Crear Cuenta'}
+            </Button>
+
+            <div className="text-center">
+              <span className="text-muted small">¿Ya tienes una cuenta? </span>
+              <Link to="/login" className="text-white small fw-bold text-decoration-none hover-white">
+                Inicia sesión aquí
+              </Link>
+            </div>
+          </Form>
+        </div>
+      </Container>
     </div>
   );
 }

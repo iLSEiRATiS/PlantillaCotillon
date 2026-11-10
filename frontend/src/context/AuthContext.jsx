@@ -1,113 +1,78 @@
-﻿import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import api from '../lib/api';
+import { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
 
-const AuthCtx = createContext(null);
-const INACTIVITY_MS = 30 * 60 * 1000;
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('auth_token') || '');
+  const [token, setToken] = useState(() => localStorage.getItem('cotillon_token') || null);
   const [user, setUser] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('auth_user') || 'null');
+      const saved = localStorage.getItem('cotillon_user');
+      return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
     }
   });
-  const [loading, setLoading] = useState(!!token);
-  const inactivityTimerRef = useRef(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-    async function boot() {
-      if (!token) return;
+    async function verifyUser() {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
-        const { user } = await api.auth.me(token);
-        if (!cancelled) setUser(user);
-      } catch {
-        if (!cancelled) {
-          setToken('');
-          setUser(null);
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('auth_user');
-        }
+        const profile = await api.getMe(token);
+        setUser(profile);
+        localStorage.setItem('cotillon_user', JSON.stringify(profile));
+      } catch (err) {
+        console.warn('Sesión expirada o token inválido:', err);
+        logout();
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     }
-    boot();
-    return () => {
-      cancelled = true;
-    };
+    verifyUser();
   }, [token]);
 
-  const logoutInternal = () => {
-    setToken('');
+  const login = async (credentials) => {
+    const data = await api.login(credentials);
+    const authToken = data.token || data.access;
+    setToken(authToken);
+    setUser(data.user);
+    localStorage.setItem('cotillon_token', authToken);
+    localStorage.setItem('cotillon_user', JSON.stringify(data.user));
+    return data;
+  };
+
+  const register = async (userData) => {
+    const data = await api.register(userData);
+    const authToken = data.token || data.access;
+    setToken(authToken);
+    setUser(data.user);
+    localStorage.setItem('cotillon_token', authToken);
+    localStorage.setItem('cotillon_user', JSON.stringify(data.user));
+    return data;
+  };
+
+  const logout = () => {
+    setToken(null);
     setUser(null);
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    localStorage.removeItem('cotillon_token');
+    localStorage.removeItem('cotillon_user');
   };
 
-  const persistUser = (nextUser) => {
-    setUser(nextUser || null);
-    if (nextUser) localStorage.setItem('auth_user', JSON.stringify(nextUser));
-    else localStorage.removeItem('auth_user');
-  };
-
-  useEffect(() => {
-    if (!token || !user) return;
-
-    const resetTimer = () => {
-      if (inactivityTimerRef.current) {
-        clearTimeout(inactivityTimerRef.current);
-      }
-      inactivityTimerRef.current = setTimeout(() => {
-        logoutInternal();
-      }, INACTIVITY_MS);
-    };
-
-    const onActivity = () => resetTimer();
-    const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'];
-    events.forEach((evt) => window.addEventListener(evt, onActivity, { passive: true }));
-    resetTimer();
-
-    return () => {
-      if (inactivityTimerRef.current) {
-        clearTimeout(inactivityTimerRef.current);
-      }
-      events.forEach((evt) => window.removeEventListener(evt, onActivity));
-    };
-  }, [token, user]);
-
-  const value = useMemo(
-    () => {
-      const hasActiveSession = !!token && (loading || !!user);
-      return ({
-      token,
-      user,
-      loading,
-      isLoggedIn: hasActiveSession,
-      login({ token, user }) {
-        setToken(token);
-        persistUser(user);
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('auth_user', JSON.stringify(user));
-      },
-      updateUser(nextUser) {
-        persistUser(nextUser);
-      },
-      logout() {
-        logoutInternal();
-      },
-    });
-    },
-    [token, user, loading]
+  return (
+    <AuthContext.Provider value={{ token, user, isLoggedIn: !!token, loading, login, register, logout }}>
+      {children}
+    </AuthContext.Provider>
   );
-
-  return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthCtx);
-  if (!ctx) throw new Error('useAuth debe usarse dentro de <AuthProvider>');
-  return ctx;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth debe usarse dentro de un AuthProvider');
+  }
+  return context;
 }

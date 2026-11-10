@@ -1,43 +1,39 @@
 import { Container, Row, Col, Card, Accordion, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { FaSearch, FaShoppingCart, FaTruck, FaCheckCircle, FaQuestionCircle, FaFileInvoiceDollar } from 'react-icons/fa';
+import { FaSearch, FaShoppingCart, FaCheckCircle, FaQuestionCircle, FaFileInvoiceDollar, FaArrowRight } from 'react-icons/fa';
 
-const ComoComprar = () => {
+export default function ComoComprar() {
   const steps = [
     {
-      step: '01',
-      icon: <FaSearch size={28} className="text-white" />,
-      title: 'Explora el Catálogo',
-      description:
-        'Recorre nuestras categorías de cotillón (globos, vajilla descartable, bengalas, guirnaldas y accesorios). Usa los filtros y la barra de búsqueda para encontrar los artículos que necesitas para tu evento.',
+      num: '01',
+      icon: <FaSearch size={22} />,
+      title: 'Explora y Elige',
+      desc: 'Navega por nuestro catálogo organizado por categorías (globos, vajilla, bengalas, guirnaldas). Filtra por colecciones y selecciona tus artículos favoritos.',
     },
     {
-      step: '02',
-      icon: <FaShoppingCart size={28} className="text-white" />,
-      title: 'Agrega al Carrito',
-      description:
-        'Selecciona las unidades deseadas. Verifica que tu pedido alcance el monto mínimo de compra si aplica según la política mayorista configurada en la tienda.',
+      num: '02',
+      icon: <FaShoppingCart size={22} />,
+      title: 'Arma tu Carrito',
+      desc: 'Selecciona las cantidades necesarias. En el carrito lateral podrás revisar el subtotal y asegurarte de cumplir con las políticas de pedido.',
     },
     {
-      step: '03',
-      icon: <FaFileInvoiceDollar size={28} className="text-white" />,
-      title: 'Completa tus Datos',
-      description:
-        'Ingresa tu dirección de entrega, ciudad, número de teléfono y notas específicas para el despacho. Puedes comprar como invitado o creando una cuenta para guardar tu historial.',
+      num: '03',
+      icon: <FaFileInvoiceDollar size={22} />,
+      title: 'Datos de Entrega',
+      desc: 'Ingresa tus datos personales, dirección de envío o solicita retiro en depósito. Puedes comprar como invitado o con tu cuenta de cliente.',
     },
     {
-      step: '04',
-      icon: <FaCheckCircle size={28} className="text-white" />,
+      num: '04',
+      icon: <FaCheckCircle size={22} />,
       title: 'Confirmación y Despacho',
-      description:
-        'Recibirás el número de orden y comprobante en PDF al instante. Nuestro equipo prepara el pedido y coordina el envío express o la entrega según lo acordado.',
+      desc: 'Generamos tu número de pedido al instante y te enviamos el comprobante. Nuestro equipo embala tus productos y coordina el envío.',
     },
   ];
 
   const faqs = [
     {
       q: '¿Tienen un monto mínimo de compra?',
-      a: 'Sí, la plataforma cuenta con un mínimo de pedido ajustable desde el panel administrativo (por defecto $15.000). En el carrito podrás ver en tiempo real cuánto te falta para completarlo.',
+      a: 'Sí, la plataforma cuenta con un mínimo de pedido ajustable desde la configuración (por defecto $15.000). En el carrito podrás ver en tiempo real si alcanzaste el monto.',
     },
     {
       q: '¿Cómo se realizan los envíos?',
@@ -53,81 +49,68 @@ const ComoComprar = () => {
     },
     {
       q: '¿Puedo solicitar factura A o B?',
-      a: 'Sí, emitimos factura para consumidor final o responsable inscripto. Solo debes dejar asentados tus datos fiscales en la nota del pedido o en tu perfil.',
+      a: 'Sí, emitimos factura para consumidor final o responsable inscripto. Solo debes dejar asentados tus datos fiscales en la nota del pedido.',
     },
   ];
 
   return (
-    <div className="como-comprar-page py-5">
+    <div className="py-5">
       <Container>
-        {/* Header Hero */}
-        <div className="text-center mb-5 pb-3">
-          <span className="badge bg-secondary text-light px-3 py-2 mb-3 text-uppercase tracking-wider">
-            Guía de Compra
-          </span>
+        {/* Encabezado */}
+        <div className="text-center mb-5 pb-2">
+          <span className="custom-badge d-inline-block mb-3">Guía de Compra</span>
           <h1 className="display-4 fw-bold text-white mb-3">¿Cómo Comprar en Nuestra Tienda?</h1>
-          <p className="text-muted lead mx-auto" style={{ maxWidth: '720px' }}>
-            Un proceso simple, ágil y transparente diseñado para facilitarte la compra de cotillón,
-            artículos festivos y ambientación para tus eventos.
+          <p className="lead text-muted mx-auto" style={{ maxWidth: '680px' }}>
+            Un proceso ágil, intuitivo y transparente diseñado para facilitarte la selección y compra
+            de cotillón y ambientación para tus festejos.
           </p>
         </div>
 
-        {/* Pasos de compra */}
-        <Row className="g-4 mb-5 pb-4">
-          {steps.map((item, idx) => (
-            <Col lg={3} sm={6} key={`step-${idx}`}>
-              <Card className="h-100 bg-surface border-secondary text-light p-3 position-relative overflow-hidden step-card">
-                <div className="d-flex align-items-center justify-content-between mb-3">
-                  <div className="p-3 bg-secondary rounded-3 d-inline-flex align-items-center justify-content-center">
-                    {item.icon}
+        {/* Pasos */}
+        <Row className="g-4 mb-5 pb-3">
+          {steps.map((st, i) => (
+            <Col lg={3} sm={6} key={i}>
+              <div className="p-4 rounded-3 bg-surface-card border border-secondary border-opacity-25 h-100 d-flex flex-column custom-card">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <div className="p-3 rounded-circle bg-surface border border-secondary text-white">
+                    {st.icon}
                   </div>
-                  <span className="display-6 fw-bold text-muted opacity-25">{item.step}</span>
+                  <span className="step-number">{st.num}</span>
                 </div>
-                <Card.Body className="p-0">
-                  <Card.Title className="h5 fw-bold text-white mb-2">{item.title}</Card.Title>
-                  <Card.Text className="text-muted small lh-base">{item.description}</Card.Text>
-                </Card.Body>
-              </Card>
+                <h5 className="fw-bold text-white mb-2">{st.title}</h5>
+                <p className="text-muted small mb-0 lh-base">{st.desc}</p>
+              </div>
             </Col>
           ))}
         </Row>
 
-        {/* Banner intermedio Call to Action */}
-        <div className="bg-surface border border-secondary rounded-4 p-4 p-md-5 mb-5 text-center position-relative">
-          <Row className="align-items-center justify-content-center">
-            <Col md={8}>
-              <h2 className="fw-bold text-white mb-3">¿Listo para armar tu pedido?</h2>
-              <p className="text-muted mb-4">
-                Explora todo nuestro catálogo organizado por categorías con stock y precios actualizados.
-              </p>
-              <div className="d-flex flex-wrap justify-content-center gap-3">
-                <Button as={Link} to="/productos" variant="light" size="lg" className="fw-bold px-4">
-                  Ver Catálogo de Productos
-                </Button>
-                <Button as={Link} to="/register" variant="outline-light" size="lg" className="px-4">
-                  Crear Cuenta
-                </Button>
-              </div>
-            </Col>
-          </Row>
+        {/* CTA Catálogo */}
+        <div className="p-5 rounded-4 bg-surface-card border border-secondary border-opacity-50 text-center mb-5 position-relative">
+          <h3 className="fw-bold text-white mb-2">¿Listo para armar tu pedido?</h3>
+          <p className="text-muted small mb-4 mx-auto" style={{ maxWidth: '520px' }}>
+            Ingresa a nuestro catálogo, elige los productos que necesitas y confirma tu pedido en minutos.
+          </p>
+          <Button as={Link} to="/catalogo" className="btn-monochrome px-4 py-2">
+            Ver Catálogo de Artículos <FaArrowRight size={12} className="ms-2" />
+          </Button>
         </div>
 
-        {/* Preguntas frecuentes (FAQ) */}
-        <div className="faq-section mx-auto" style={{ maxWidth: '860px' }}>
+        {/* FAQ Accordion */}
+        <div className="mx-auto" style={{ maxWidth: '820px' }}>
           <div className="text-center mb-4">
-            <FaQuestionCircle size={32} className="text-muted mb-2" />
-            <h3 className="fw-bold text-white">Preguntas Frecuentes</h3>
-            <p className="text-muted small">Respuestas rápidas a las consultas más habituales de nuestros clientes.</p>
+            <FaQuestionCircle size={28} className="text-dim mb-2" />
+            <h3 className="h4 fw-bold text-white">Preguntas Frecuentes</h3>
+            <p className="text-muted small">Respuestas a las dudas más comunes de nuestros clientes.</p>
           </div>
 
-          <Accordion defaultActiveKey="0" className="faq-accordion">
-            {faqs.map((faq, i) => (
-              <Accordion.Item eventKey={String(i)} key={`faq-${i}`} className="bg-surface border-secondary mb-3 rounded overflow-hidden">
+          <Accordion defaultActiveKey="0" className="d-flex flex-column gap-3">
+            {faqs.map((f, idx) => (
+              <Accordion.Item eventKey={String(idx)} key={idx} className="bg-surface-card border border-secondary border-opacity-25 rounded-3 overflow-hidden">
                 <Accordion.Header className="text-white">
-                  <strong>{faq.q}</strong>
+                  <strong>{f.q}</strong>
                 </Accordion.Header>
-                <Accordion.Body className="text-muted small lh-base bg-surface">
-                  {faq.a}
+                <Accordion.Body className="text-muted small lh-base bg-surface-card">
+                  {f.a}
                 </Accordion.Body>
               </Accordion.Item>
             ))}
@@ -136,6 +119,4 @@ const ComoComprar = () => {
       </Container>
     </div>
   );
-};
-
-export default ComoComprar;
+}
