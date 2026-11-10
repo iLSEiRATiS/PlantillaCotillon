@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('--- Iniciando seed de datos para PlantillaCotillón ---');
+  console.log('--- Iniciando seed de datos para PlantillaCotillón (Estilo Genuino Cotillón) ---');
 
   // Limpiar datos existentes
   await prisma.orderItem.deleteMany();
@@ -21,8 +21,8 @@ async function main() {
       email: 'admin@cotillon.com',
       username: 'admin',
       password: hashedPassword,
-      firstName: 'Admin',
-      lastName: 'Plantilla',
+      firstName: 'Administrador',
+      lastName: 'Tienda',
       isStaff: true,
       isSuperuser: true,
     },
@@ -34,8 +34,8 @@ async function main() {
       email: 'cliente@cotillon.com',
       username: 'cliente',
       password: clientHashed,
-      firstName: 'Lucas',
-      lastName: 'Gómez',
+      firstName: 'Mariana',
+      lastName: 'Fernández',
       isStaff: false,
       isSuperuser: false,
     },
@@ -49,16 +49,16 @@ async function main() {
       showPricesToGuests: true,
       maintenanceMode: false,
       maintenanceTitle: 'Estamos preparando novedades',
-      maintenanceMessage: 'Volvemos en breves minutos.',
+      maintenanceMessage: 'Volvemos en breves minutos con más artículos para fiestas.',
     },
   });
 
-  // Categorías de Cotillón
+  // Categorías de Cotillón festivo
   const catGlobos = await prisma.category.create({
     data: {
       nombre: 'Globos & Arreglos',
       slug: 'globos-arreglos',
-      descripcion: 'Globos látex, perlados, números gigantes y bouquets monocromáticos para ambientación.',
+      descripcion: 'Globos látex, perlados, pastel, metalizados, números gigantes y bouquets.',
     },
   });
 
@@ -66,7 +66,7 @@ async function main() {
     data: {
       nombre: 'Vajilla & Deco de Mesa',
       slug: 'vajilla-deco-mesa',
-      descripcion: 'Vasos, platos de polipapel, servilletas y mantelería en tonalidades blanco, negro y plata.',
+      descripcion: 'Platos, vasos descartables, servilletas temáticas, manteles y sorbetes ecológicos.',
     },
   });
 
@@ -74,126 +74,126 @@ async function main() {
     data: {
       nombre: 'Velas & Bengalas',
       slug: 'velas-bengalas',
-      descripcion: 'Velas de número, chispas de bengala, fuentes frías y toppers modernos.',
+      descripcion: 'Velas numéricas, volcán con chispas, bengalas de humo y fuentes frías.',
     },
   });
 
   const catGuirnaldas = await prisma.category.create({
     data: {
-      nombre: 'Guirnaldas & Banners',
-      slug: 'guirnaldas-banners',
-      descripcion: 'Banderines, borlas, flecos metalizados y fondos de photocall minimalistas.',
+      nombre: 'Guirnaldas & Fondos',
+      slug: 'guirnaldas-fondos',
+      descripcion: 'Banderines Feliz Cumpleaños, cortinas metalizadas holográficas y pompones.',
     },
   });
 
   const catAccesorios = await prisma.category.create({
     data: {
-      nombre: 'Accesorios & Props',
-      slug: 'accesorios-props',
-      descripcion: 'Antifaces, gafas divertidas, vinchas temáticas y sombreros de fiesta.',
+      nombre: 'Carnaval Carioca & Props',
+      slug: 'carnaval-carioca-props',
+      descripcion: 'Vinchas luminosas, antifaces con plumas, gafas divertidas, sombreros y maracas.',
     },
   });
 
-  // Productos de prueba con estética monocromática
+  // Productos con fotos reales, alegres y vibrantes
   const products = [
     {
-      nombre: 'Pack 50 Globos Látex Negro Mate 12"',
-      slug: 'pack-50-globos-latex-negro-mate',
-      sku: 'GLO-001-BLK',
-      precio: 8500,
-      descripcion: 'Set de 50 globos de látex de alta resistencia acabado negro mate. Aptos para inflar con aire o helio.',
-      imageUrl: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&auto=format&fit=crop&q=80',
-      stock: 120,
-      categoriaId: catGlobos.id,
-    },
-    {
-      nombre: 'Bouquet Globos Metalizados Plata & Cromo',
-      slug: 'bouquet-globos-metalizados-plata-cromo',
-      sku: 'GLO-002-SLV',
-      precio: 14200,
-      descripcion: 'Kit de 10 globos combinados: 4 cromo plata, 3 confeti gris humo y 3 negros perlados.',
-      imageUrl: 'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=800&auto=format&fit=crop&q=80',
-      stock: 45,
-      categoriaId: catGlobos.id,
-    },
-    {
-      nombre: 'Globo Número Gigante 80cm - Black Foil',
-      slug: 'globo-numero-gigante-80cm-black-foil',
-      sku: 'GLO-003-NUM',
-      precio: 6500,
-      descripcion: 'Globo de lámina metálica en color negro azabache de 80 cm de alto. Válvula de autosellado.',
+      nombre: 'Pack 50 Globos Perlados Multicolor Pastel 12"',
+      slug: 'pack-50-globos-perlados-multicolor-pastel',
+      sku: 'GLO-001-PAS',
+      precio: 8900,
+      descripcion: 'Set de 50 globos de látex premium en tonos pastel (rosa, lila, menta, amarillo y celeste). Aptos para helio o aire.',
       imageUrl: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&auto=format&fit=crop&q=80',
-      stock: 80,
+      stock: 150,
       categoriaId: catGlobos.id,
     },
     {
-      nombre: 'Set Vajilla Polipapel Black & White (16 personas)',
-      slug: 'set-vajilla-polipapel-black-white',
-      sku: 'VAJ-001-BW',
-      precio: 18900,
-      descripcion: 'Incluye 16 platos grandes, 16 vasos térmicos y 20 servilletas de triple hoja con diseño geométrico sobrio.',
+      nombre: 'Kit Arco Orgánico 100 Globos Confeti & Dorado',
+      slug: 'kit-arco-organico-100-globos-confeti-dorado',
+      sku: 'GLO-002-ARC',
+      precio: 16500,
+      descripcion: 'Kit completo para armar arco de globos. Incluye cinta guía de 5 metros, puntos de pegamento y globos con confeti brillante.',
+      imageUrl: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&auto=format&fit=crop&q=80',
+      stock: 60,
+      categoriaId: catGlobos.id,
+    },
+    {
+      nombre: 'Globo Número Gigante Metalizado Oro Rosa 80cm',
+      slug: 'globo-numero-gigante-oro-rosa-80cm',
+      sku: 'GLO-003-NUM',
+      precio: 6200,
+      descripcion: 'Globo metalizado gigante acabado brillante Oro Rosa de 80 cm. Válvula con autosellado, ideal para aniversarios y cumpleaños.',
+      imageUrl: 'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?w=800&auto=format&fit=crop&q=80',
+      stock: 85,
+      categoriaId: catGlobos.id,
+    },
+    {
+      nombre: 'Combo Vajilla Polipapel Party Neón (24 Personas)',
+      slug: 'combo-vajilla-polipapel-party-neon',
+      sku: 'VAJ-001-NEO',
+      precio: 19800,
+      descripcion: 'Pack completo para 24 invitados: 24 platos de 23cm, 24 vasos térmicos de 240cc y 40 servilletas estampadas de triple hoja.',
       imageUrl: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&auto=format&fit=crop&q=80',
-      stock: 30,
+      stock: 40,
       categoriaId: catVajilla.id,
     },
     {
-      nombre: 'Mantel Plástico Descartable Negro Grafito 1.40x2.50m',
-      slug: 'mantel-plastico-descartable-negro-grafito',
+      nombre: 'Mantel Plástico Descartable Confeti Festivo 1.40x2.40m',
+      slug: 'mantel-plastico-confeti-festivo',
       sku: 'VAJ-002-MNT',
-      precio: 4200,
-      descripcion: 'Mantel impermeable extra grueso para mesas principales o de candy bar. Reutilizable o descartable.',
+      precio: 4500,
+      descripcion: 'Mantel impermeable con estampado de confeti y serpentinas multicolores. Fácil de limpiar y reutilizable.',
       imageUrl: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=800&auto=format&fit=crop&q=80',
-      stock: 95,
+      stock: 90,
       categoriaId: catVajilla.id,
     },
     {
-      nombre: 'Bengalas de Humo Blanco para Fotografía (x4)',
-      slug: 'bengalas-humo-blanco-fotografia',
+      nombre: 'Bengalas de Humo Festivo x6 Colores Flúo',
+      slug: 'bengalas-humo-festivo-x6-colores-fluo',
       sku: 'VEL-001-HUM',
-      precio: 12500,
-      descripcion: 'Tubos de efecto humo denso blanco puro. Duración aproximada: 60 segundos continuos. Ideal eventos diurnos.',
+      precio: 14500,
+      descripcion: 'Tubos de efecto humo denso en colores vibrantes (azul, magenta, verde, naranja, amarillo y violeta). Duración 60 segundos.',
       imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop&q=80',
-      stock: 50,
+      stock: 70,
       categoriaId: catVelas.id,
     },
     {
-      nombre: 'Pack 12 Velas Estilizadas Charcoal Grey 25cm',
-      slug: 'pack-12-velas-estilizadas-charcoal-grey',
-      sku: 'VEL-002-CHG',
-      precio: 9800,
-      descripcion: 'Velas cónicas sin goteo color gris carbón. Tiempo de quemado aproximado: 7 horas por unidad.',
-      imageUrl: 'https://images.unsplash.com/photo-1602874801007-bd458bb1b8b8?w=800&auto=format&fit=crop&q=80',
-      stock: 65,
-      categoriaId: catVelas.id,
-    },
-    {
-      nombre: 'Cortina Metalizada Fondo de Photocall Negro / Plata',
-      slug: 'cortina-metalizada-photocall-negro-plata',
-      sku: 'GUI-001-COR',
-      precio: 5600,
-      descripcion: 'Cortina de flecos brillantes de 1 metro de ancho por 2 metros de alto. Autoadhesiva en la parte superior.',
+      nombre: 'Pack 4 Velas Volcán Fuente Fría para Torta',
+      slug: 'pack-4-velas-volcan-fuente-fria-torta',
+      sku: 'VEL-002-VOL',
+      precio: 7800,
+      descripcion: 'Velas de chispas frías de seguridad para interiores. Duración 45 segundos, no desprenden humo negro ni alteran el sabor de la torta.',
       imageUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80',
+      stock: 120,
+      categoriaId: catVelas.id,
+    },
+    {
+      nombre: 'Cortina Metalizada Holográfica Multicolor 1x2m',
+      slug: 'cortina-metalizada-holografica-multicolor',
+      sku: 'GUI-001-COR',
+      precio: 5800,
+      descripcion: 'Cortina de flecos con reflejos prismáticos arcoíris. Trae banda adhesiva incorporada para fijación rápida en pared o photocall.',
+      imageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80',
+      stock: 95,
+      categoriaId: catGuirnaldas.id,
+    },
+    {
+      nombre: 'Guirnalda Letras Glitter "FELIZ CUMPLEAÑOS" 2.5m',
+      slug: 'guirnalda-letras-glitter-feliz-cumpleanos',
+      sku: 'GUI-002-CUM',
+      precio: 5200,
+      descripcion: 'Banderines en cartulina metalizada dorada con purpurina encapsulada que no se desprende. Incluye cinta satinada para colgar.',
+      imageUrl: 'https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?w=800&auto=format&fit=crop&q=80',
       stock: 110,
       categoriaId: catGuirnaldas.id,
     },
     {
-      nombre: 'Banderines Tipográficos "CELEBRATE" Minimalistas',
-      slug: 'banderines-tipograficos-celebrate-minimalistas',
-      sku: 'GUI-002-BAN',
-      precio: 4900,
-      descripcion: 'Guirnalda en cartulina texturada blanca con tipografía sans-serif negra e hilo encerado de 3 metros.',
-      imageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop&q=80',
-      stock: 75,
-      categoriaId: catGuirnaldas.id,
-    },
-    {
-      nombre: 'Kit 20 Props y Gafas Photocall Monocromo',
-      slug: 'kit-20-props-gafas-photocall-monocromo',
-      sku: 'ACC-001-PRP',
-      precio: 7800,
-      descripcion: 'Accesorios rígidos con palillo para fotos divertidas: bigotes, gafas estilo aviador, corbatas y sombreros.',
-      imageUrl: 'https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?w=800&auto=format&fit=crop&q=80',
-      stock: 60,
+      nombre: 'Kit Carnaval Carioca 50 Artículos Surtidos',
+      slug: 'kit-carnaval-carioca-50-articulos-surtidos',
+      sku: 'ACC-001-CAR',
+      precio: 24900,
+      descripcion: 'Combo fiesta: 15 vinchas con plumas, 15 collares hawaianos multicolores, 10 antifaces venecianos y 10 maracas sonoras.',
+      imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop&q=80',
+      stock: 50,
       categoriaId: catAccesorios.id,
     },
   ];
@@ -204,10 +204,73 @@ async function main() {
     });
   }
 
-  console.log(`✅ Seed completado con éxito:`);
+  // Crear 2 pedidos de ejemplo para que el panel de administración tenga datos reales para mostrar
+  await prisma.order.create({
+    data: {
+      nombre: 'Mariana Fernández',
+      email: 'mariana.eventos@gmail.com',
+      telefono: '11 4455-8899',
+      direccion: 'Av. Corrientes 3450, Piso 4B',
+      ciudad: 'CABA',
+      estado: 'Buenos Aires',
+      cp: '1193',
+      destinatarioDocumento: '32.445.678',
+      nota: 'Entregar preferentemente por la tarde.',
+      status: 'review',
+      envio: 3500,
+      total: 39200,
+      userId: clientUser.id,
+      items: {
+        create: [
+          {
+            productName: 'Kit Carnaval Carioca 50 Artículos Surtidos',
+            cantidad: 1,
+            precioUnitario: 24900,
+          },
+          {
+            productName: 'Pack 50 Globos Perlados Multicolor Pastel 12"',
+            cantidad: 1,
+            precioUnitario: 8900,
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.order.create({
+    data: {
+      nombre: 'Esteban Morales',
+      email: 'esteban.fiestas@hotmail.com',
+      telefono: '11 6789-1234',
+      direccion: 'Calle San Martín 1240',
+      ciudad: 'San Isidro',
+      estado: 'Buenos Aires',
+      cp: '1642',
+      status: 'created',
+      envio: 0,
+      total: 24300,
+      items: {
+        create: [
+          {
+            productName: 'Combo Vajilla Polipapel Party Neón (24 Personas)',
+            cantidad: 1,
+            precioUnitario: 19800,
+          },
+          {
+            productName: 'Mantel Plástico Descartable Confeti Festivo',
+            cantidad: 1,
+            precioUnitario: 4500,
+          },
+        ],
+      },
+    },
+  });
+
+  console.log(`✅ Seed festivo completado con éxito:`);
   console.log(`- 2 usuarios creados (admin@cotillon.com, cliente@cotillon.com)`);
-  console.log(`- 5 categorías creadas`);
-  console.log(`- ${products.length} productos monocromáticos cargados`);
+  console.log(`- 5 categorías festivas creadas`);
+  console.log(`- 10 productos de cotillón cargados`);
+  console.log(`- 2 pedidos de prueba para el panel de administración`);
 }
 
 main()

@@ -19,7 +19,7 @@ export default function ProductCard({ product }) {
     product.imageUrl ||
     product.image_url ||
     (Array.isArray(product.images) && product.images[0]) ||
-    'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&auto=format&fit=crop&q=80';
+    'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&auto=format&fit=crop&q=80';
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -37,28 +37,28 @@ export default function ProductCard({ product }) {
       </div>
 
       <Card.Body className="d-flex flex-column p-3">
-        <h6 className="text-white fw-bold mb-1 text-truncate" title={name}>
+        <h6 className="fw-bold mb-1 text-truncate" style={{ color: '#0f172a', fontSize: '1rem' }} title={name}>
           {name}
         </h6>
-        <p className="text-dim small mb-3 text-truncate">
-          {product.descripcion || product.description || 'Artículo de ambientación y fiesta.'}
+        <p className="text-muted small mb-3 text-truncate" style={{ lineHeight: '1.4' }}>
+          {product.descripcion || product.description || 'Artículo ideal para fiestas, cumpleaños y eventos.'}
         </p>
 
-        <div className="mt-auto d-flex align-items-center justify-content-between pt-2 border-top border-secondary border-opacity-25">
-          <span className="h5 fw-bold text-white mb-0">{formatMoney(price)}</span>
+        <div className="mt-auto d-flex align-items-center justify-content-between pt-2 border-top border-light-subtle">
+          <span className="product-price-tag mb-0">{formatMoney(price)}</span>
 
           <Button
             size="sm"
-            className={added ? 'btn-monochrome-outline' : 'btn-monochrome'}
+            className={added ? 'btn-festive-outline' : 'btn-festive'}
             onClick={handleAdd}
             aria-label="Agregar al carrito"
           >
             {added ? (
-              <span className="d-flex align-items-center gap-1 small">
+              <span className="d-flex align-items-center gap-1 small fw-bold">
                 <FaCheck /> Listo
               </span>
             ) : (
-              <span className="d-flex align-items-center gap-1 small">
+              <span className="d-flex align-items-center gap-1 small fw-bold">
                 <FaPlus size={10} /> Agregar
               </span>
             )}

@@ -40,13 +40,25 @@ export default function Register() {
   return (
     <div className="py-5 my-auto">
       <Container style={{ maxWidth: '480px' }}>
-        <div className="p-4 p-sm-5 rounded-4 bg-surface-card border border-secondary border-opacity-25 shadow-lg">
+        <div
+          className="p-4 p-sm-5 rounded-4"
+          style={{
+            backgroundColor: '#ffffff',
+            border: '1.5px solid #e2e8f0',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02)',
+          }}
+        >
           <div className="text-center mb-4">
-            <div className="p-3 rounded-circle bg-surface border border-secondary text-white d-inline-flex mb-3">
-              <FaUserPlus size={24} />
+            <div
+              className="p-3 rounded-circle d-inline-flex mb-3"
+              style={{ backgroundColor: '#ffe4e6', color: '#e11d48' }}
+            >
+              <FaUserPlus size={26} />
             </div>
-            <h2 className="h4 fw-bold text-white mb-1">Crear Cuenta</h2>
-            <p className="text-muted small mb-0">Regístrate para guardar tus pedidos y agilizar tus compras.</p>
+            <h2 className="h4 fw-bold mb-1" style={{ color: '#0f172a' }}>Crear Cuenta</h2>
+            <p className="small mb-0" style={{ color: '#64748b' }}>
+              Regístrate para guardar tus pedidos y agilizar tus compras en CotiFiesta.
+            </p>
           </div>
 
           {error && <Alert variant="danger" className="py-2 small mb-3">{error}</Alert>}
@@ -54,43 +66,43 @@ export default function Register() {
           <Form onSubmit={handleSubmit}>
             <div className="row g-2 mb-3">
               <div className="col-6">
-                <Form.Label className="small text-muted">Nombre</Form.Label>
+                <Form.Label className="small fw-bold" style={{ color: '#334155' }}>Nombre</Form.Label>
                 <Form.Control
                   className="form-control-custom"
                   required
                   name="first_name"
                   value={form.first_name}
                   onChange={handleChange}
-                  placeholder="Carlos"
+                  placeholder="Carolina"
                 />
               </div>
               <div className="col-6">
-                <Form.Label className="small text-muted">Apellido</Form.Label>
+                <Form.Label className="small fw-bold" style={{ color: '#334155' }}>Apellido</Form.Label>
                 <Form.Control
                   className="form-control-custom"
                   required
                   name="last_name"
                   value={form.last_name}
                   onChange={handleChange}
-                  placeholder="López"
+                  placeholder="Gómez"
                 />
               </div>
             </div>
 
             <div className="mb-3">
-              <Form.Label className="small text-muted">Nombre de Usuario</Form.Label>
+              <Form.Label className="small fw-bold" style={{ color: '#334155' }}>Nombre de Usuario</Form.Label>
               <Form.Control
                 className="form-control-custom"
                 required
                 name="username"
                 value={form.username}
                 onChange={handleChange}
-                placeholder="carlos_eventos"
+                placeholder="caro_eventos"
               />
             </div>
 
             <div className="mb-3">
-              <Form.Label className="small text-muted">Email</Form.Label>
+              <Form.Label className="small fw-bold" style={{ color: '#334155' }}>Email</Form.Label>
               <Form.Control
                 type="email"
                 className="form-control-custom"
@@ -98,12 +110,12 @@ export default function Register() {
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                placeholder="carlos@ejemplo.com"
+                placeholder="caro@ejemplo.com"
               />
             </div>
 
             <div className="mb-4">
-              <Form.Label className="small text-muted">Contraseña</Form.Label>
+              <Form.Label className="small fw-bold" style={{ color: '#334155' }}>Contraseña</Form.Label>
               <Form.Control
                 type="password"
                 className="form-control-custom"
@@ -115,13 +127,13 @@ export default function Register() {
               />
             </div>
 
-            <Button type="submit" className="btn-monochrome w-100 py-2 fw-bold mb-3" disabled={loading}>
-              {loading ? <Spinner animation="border" size="sm" /> : 'Crear Cuenta'}
+            <Button type="submit" className="btn-festive w-100 py-2 fw-bold mb-3" disabled={loading}>
+              {loading ? <Spinner animation="border" size="sm" /> : 'Registrarse'}
             </Button>
 
             <div className="text-center">
-              <span className="text-muted small">¿Ya tienes una cuenta? </span>
-              <Link to="/login" className="text-white small fw-bold text-decoration-none hover-white">
+              <span className="small" style={{ color: '#64748b' }}>¿Ya tienes una cuenta? </span>
+              <Link to="/login" className="small fw-bold text-decoration-none" style={{ color: '#e11d48' }}>
                 Inicia sesión aquí
               </Link>
             </div>

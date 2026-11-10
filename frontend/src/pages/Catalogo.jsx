@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Container, Row, Col, Form, InputGroup, Button, Spinner, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Form, InputGroup, Button, Spinner } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
-import { FaSearch, FaTimes, FaFilter } from 'react-icons/fa';
+import { FaSearch, FaTimes } from 'react-icons/fa';
 import api from '../services/api';
 import ProductCard from '../components/ProductCard';
 
@@ -82,15 +82,15 @@ export default function Catalogo() {
       <Container>
         {/* Cabecera del Catálogo */}
         <div className="mb-4">
-          <span className="text-dim small text-uppercase fw-bold tracking-wider">Tienda Online</span>
-          <h1 className="h2 fw-bold text-white mb-2">Catálogo de Productos</h1>
-          <p className="text-muted small mb-0">
-            Explora todos nuestros artículos de cotillón, ambientación y decoración festiva.
+          <span className="text-danger small text-uppercase fw-bold tracking-wider">Tienda Online</span>
+          <h1 className="h2 fw-bold mb-1" style={{ color: '#0f172a' }}>Catálogo de Artículos</h1>
+          <p className="text-secondary small mb-0">
+            Explora todos nuestros productos para cumpleaños, eventos y fiestas temáticas.
           </p>
         </div>
 
         {/* Barra de Filtros y Búsqueda */}
-        <div className="p-3 rounded-3 bg-surface-card border border-secondary border-opacity-25 mb-4">
+        <div className="p-3 rounded-3 bg-white border shadow-sm mb-4">
           <Row className="g-3 align-items-center">
             <Col lg={6} md={7}>
               <Form onSubmit={handleSearchSubmit}>
@@ -98,12 +98,12 @@ export default function Catalogo() {
                   <Form.Control
                     type="search"
                     className="form-control-custom"
-                    placeholder="Buscar por nombre, SKU o descripción..."
+                    placeholder="Buscar por nombre, SKU o cotillón..."
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                   />
-                  <Button type="submit" className="btn-monochrome px-3">
-                    <FaSearch size={14} />
+                  <Button type="submit" className="btn-festive px-3">
+                    <FaSearch size={14} /> Buscar
                   </Button>
                 </InputGroup>
               </Form>
@@ -126,10 +126,10 @@ export default function Catalogo() {
               <Col lg={3} className="text-lg-end">
                 <Button
                   variant="link"
-                  className="text-dim hover-white small p-0 text-decoration-none d-inline-flex align-items-center gap-1"
+                  className="text-danger fw-bold small p-0 text-decoration-none d-inline-flex align-items-center gap-1"
                   onClick={clearFilters}
                 >
-                  <FaTimes size={11} /> Limpiar todos los filtros
+                  <FaTimes size={11} /> Limpiar filtros
                 </Button>
               </Col>
             )}
@@ -140,7 +140,7 @@ export default function Catalogo() {
         <div className="d-flex flex-wrap gap-2 mb-4">
           <Button
             size="sm"
-            className={!currentCategory ? 'btn-monochrome' : 'btn-monochrome-dark'}
+            className={!currentCategory ? 'btn-festive' : 'btn-festive-outline'}
             onClick={() => handleCategorySelect('')}
           >
             Todas las categorías
@@ -149,7 +149,7 @@ export default function Catalogo() {
             <Button
               key={cat.id}
               size="sm"
-              className={currentCategory === cat.slug ? 'btn-monochrome' : 'btn-monochrome-dark'}
+              className={currentCategory === cat.slug ? 'btn-festive' : 'btn-festive-outline'}
               onClick={() => handleCategorySelect(cat.slug)}
             >
               {cat.nombre}
@@ -160,23 +160,24 @@ export default function Catalogo() {
         {/* Listado de Productos */}
         {loading ? (
           <div className="text-center py-5 my-5">
-            <Spinner animation="border" variant="light" />
+            <Spinner animation="border" variant="danger" />
             <p className="text-muted small mt-2">Cargando artículos...</p>
           </div>
         ) : products.length === 0 ? (
-          <div className="text-center py-5 my-5 bg-surface-card rounded-3 border border-secondary border-opacity-25 p-5">
-            <h5 className="text-white fw-bold mb-2">No se encontraron productos</h5>
+          <div className="text-center py-5 my-5 bg-white rounded-3 border p-5 shadow-sm">
+            <span className="display-4 d-block mb-2">🔍</span>
+            <h5 className="fw-bold mb-2" style={{ color: '#0f172a' }}>No se encontraron productos</h5>
             <p className="text-muted small mb-3">
               No hay artículos que coincidan con los criterios de búsqueda o categoría seleccionados.
             </p>
-            <Button className="btn-monochrome small" onClick={clearFilters}>
+            <Button className="btn-festive small" onClick={clearFilters}>
               Ver todo el catálogo
             </Button>
           </div>
         ) : (
           <>
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <span className="text-dim small">Mostrando {products.length} productos</span>
+              <span className="text-secondary small fw-bold">Mostrando {products.length} productos</span>
             </div>
             <Row className="g-4">
               {products.map((product) => (

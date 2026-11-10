@@ -21,7 +21,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          <div className="d-flex flex-column min-vh-100 bg-black text-white">
+          <div className="d-flex flex-column min-vh-100" style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-main)' }}>
             <Navbar />
             <main>
               <Routes>

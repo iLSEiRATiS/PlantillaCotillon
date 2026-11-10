@@ -38,7 +38,7 @@ export default function ProductDetail() {
   if (loading) {
     return (
       <div className="text-center py-5 my-5">
-        <Spinner animation="border" variant="light" />
+        <Spinner animation="border" variant="danger" />
         <p className="text-muted small mt-2">Cargando detalles...</p>
       </div>
     );
@@ -47,10 +47,10 @@ export default function ProductDetail() {
   if (error || !product) {
     return (
       <Container className="py-5 text-center">
-        <div className="p-5 rounded-3 bg-surface-card border border-secondary border-opacity-25 max-w-md mx-auto">
-          <h5 className="text-white fw-bold mb-3">Producto no encontrado</h5>
+        <div className="p-5 rounded-3 bg-white border max-w-md mx-auto shadow-sm">
+          <h5 className="fw-bold mb-3" style={{ color: '#0f172a' }}>Producto no encontrado</h5>
           <p className="text-muted small mb-4">{error || 'El artículo solicitado no existe o fue retirado del catálogo.'}</p>
-          <Button as={Link} to="/catalogo" className="btn-monochrome">
+          <Button as={Link} to="/catalogo" className="btn-festive">
             Volver al Catálogo
           </Button>
         </div>
@@ -66,7 +66,7 @@ export default function ProductDetail() {
     product.imageUrl ||
     product.image_url ||
     (Array.isArray(product.images) && product.images[0]) ||
-    'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&auto=format&fit=crop&q=80';
+    'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&auto=format&fit=crop&q=80';
 
   const handleAddToCart = () => {
     addToCart(product, qty);
@@ -81,18 +81,18 @@ export default function ProductDetail() {
         <div className="mb-4">
           <Button
             variant="link"
-            className="text-muted hover-white p-0 text-decoration-none small d-inline-flex align-items-center gap-2"
+            className="text-secondary p-0 text-decoration-none small d-inline-flex align-items-center gap-2 fw-bold"
             onClick={() => navigate(-1)}
           >
-            <FaArrowLeft size={12} /> Volver
+            <FaArrowLeft size={12} /> Volver al catálogo
           </Button>
         </div>
 
         <Row className="g-5 align-items-start">
           {/* Imagen del producto */}
           <Col lg={6}>
-            <div className="rounded-4 overflow-hidden border border-secondary border-opacity-25 bg-surface-card p-2">
-              <div style={{ position: 'relative', paddingTop: '85%', overflow: 'hidden', borderRadius: '0.5rem' }}>
+            <div className="rounded-4 overflow-hidden border bg-white p-2 shadow-sm">
+              <div style={{ position: 'relative', paddingTop: '85%', overflow: 'hidden', borderRadius: '0.75rem', backgroundColor: '#f1f5f9' }}>
                 <img
                   src={image}
                   alt={name}
@@ -104,46 +104,48 @@ export default function ProductDetail() {
 
           {/* Detalles y compra */}
           <Col lg={6}>
-            <div className="d-flex flex-column gap-3">
+            <div className="p-4 p-md-5 rounded-4 bg-white border shadow-sm d-flex flex-column gap-3">
               <div>
                 {categorySlug ? (
-                  <Link to={`/catalogo?cat=${categorySlug}`} className="custom-badge d-inline-block text-decoration-none mb-2">
+                  <Link to={`/catalogo?cat=${categorySlug}`} className="festive-pill text-decoration-none mb-2">
                     {categoryName}
                   </Link>
                 ) : (
-                  <span className="custom-badge d-inline-block mb-2">{categoryName}</span>
+                  <span className="festive-pill mb-2">{categoryName}</span>
                 )}
-                <h1 className="h2 fw-bold text-white mb-2">{name}</h1>
-                {product.sku && <div className="text-dim small mb-3">SKU: {product.sku}</div>}
-                <div className="display-6 fw-bold text-white mb-3">{formatMoney(price)}</div>
+                <h1 className="h2 fw-bold mb-2 mt-2" style={{ color: '#0f172a' }}>{name}</h1>
+                {product.sku && <div className="text-muted small mb-3 fw-semibold">SKU: {product.sku}</div>}
+                <div className="display-6 fw-bold mb-3" style={{ color: 'var(--primary)' }}>
+                  {formatMoney(price)}
+                </div>
               </div>
 
-              <hr className="border-secondary border-opacity-25 my-1" />
+              <hr className="my-1 border-light-subtle" />
 
               <div>
-                <h6 className="text-white small fw-bold text-uppercase tracking-wider mb-2">Descripción</h6>
-                <p className="text-muted lh-base small mb-0">
-                  {product.descripcion || product.description || 'Artículo ideal para ambientación y festejos. Materiales de alta durabilidad y estética minimalista.'}
+                <h6 className="small fw-bold text-uppercase tracking-wider mb-2" style={{ color: '#0f172a' }}>Descripción</h6>
+                <p className="text-secondary lh-base small mb-0" style={{ fontSize: '0.98rem' }}>
+                  {product.descripcion || product.description || 'Artículo ideal para fiestas, cumpleaños y ambientación. Calidad garantizada para eventos.'}
                 </p>
               </div>
 
-              <hr className="border-secondary border-opacity-25 my-1" />
+              <hr className="my-1 border-light-subtle" />
 
               {/* Selector de Cantidad y Agregar */}
               <div className="d-flex flex-column gap-3 pt-2">
                 <div className="d-flex align-items-center gap-3">
-                  <span className="text-white small fw-bold">Cantidad:</span>
-                  <div className="d-flex align-items-center border border-secondary rounded p-1 bg-surface-card">
+                  <span className="small fw-bold" style={{ color: '#0f172a' }}>Cantidad:</span>
+                  <div className="d-flex align-items-center border rounded p-1 bg-light">
                     <button
-                      className="btn btn-sm text-white p-0 px-2"
+                      className="btn btn-sm text-dark p-0 px-2 fw-bold"
                       onClick={() => setQty(Math.max(1, qty - 1))}
                       aria-label="Disminuir"
                     >
                       <FaMinus size={10} />
                     </button>
-                    <span className="small px-3 text-white fw-bold">{qty}</span>
+                    <span className="small px-3 fw-bold" style={{ color: '#0f172a' }}>{qty}</span>
                     <button
-                      className="btn btn-sm text-white p-0 px-2"
+                      className="btn btn-sm text-dark p-0 px-2 fw-bold"
                       onClick={() => setQty(qty + 1)}
                       aria-label="Aumentar"
                     >
@@ -155,7 +157,7 @@ export default function ProductDetail() {
                 <div className="d-flex gap-3">
                   <Button
                     className={`flex-grow-1 py-3 fw-bold d-flex align-items-center justify-content-center gap-2 ${
-                      added ? 'btn-monochrome-outline' : 'btn-monochrome'
+                      added ? 'btn-festive-outline' : 'btn-festive'
                     }`}
                     onClick={handleAddToCart}
                   >
@@ -172,14 +174,14 @@ export default function ProductDetail() {
                 </div>
               </div>
 
-              {/* Sellos de garantía */}
-              <div className="p-3 rounded-3 bg-surface-card border border-secondary border-opacity-25 mt-3 d-flex flex-column gap-2">
-                <div className="d-flex align-items-center gap-2 text-dim small">
-                  <FaTruck size={14} className="text-white" />
+              {/* Sellos de confianza */}
+              <div className="p-3 rounded-3 bg-light border mt-3 d-flex flex-column gap-2">
+                <div className="d-flex align-items-center gap-2 small text-secondary">
+                  <FaTruck size={16} className="text-danger" />
                   <span>Envíos a todo el país o retiro en depósito sin costo.</span>
                 </div>
-                <div className="d-flex align-items-center gap-2 text-dim small">
-                  <FaShieldAlt size={14} className="text-white" />
+                <div className="d-flex align-items-center gap-2 small text-secondary">
+                  <FaShieldAlt size={16} className="text-warning" />
                   <span>Compra protegida y confirmación inmediata con comprobante digital.</span>
                 </div>
               </div>
