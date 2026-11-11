@@ -81,11 +81,11 @@ export default function Home() {
               Encontrá los mejores globos, vajilla descartable, bengalas de humo, guirnaldas y artículos de carnaval carioca para tus festejos y eventos.
             </p>
 
-            <div className="d-flex flex-wrap justify-content-center gap-3">
-              <Button as={Link} to="/catalogo" className="btn-festive px-4 py-3">
+            <div className="d-flex flex-column flex-sm-row justify-content-center align-items-stretch align-items-sm-center gap-2 gap-sm-3 mx-auto" style={{ maxWidth: '440px' }}>
+              <Button as={Link} to="/catalogo" className="btn-festive px-4 py-3 w-100 w-sm-auto text-center justify-content-center">
                 Explorar Catálogo <FaArrowRight size={13} className="ms-1" />
               </Button>
-              <Button as={Link} to="/como-comprar" className="btn-festive-outline px-4 py-3">
+              <Button as={Link} to="/como-comprar" className="btn-festive-outline px-4 py-3 w-100 w-sm-auto text-center justify-content-center">
                 ¿Cómo Comprar?
               </Button>
             </div>
@@ -173,7 +173,7 @@ export default function Home() {
       {categories.length > 0 && (
         <section className="py-5" style={{ backgroundColor: '#f8fafc' }}>
           <Container>
-            <div className="d-flex justify-content-between align-items-end mb-4">
+            <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center align-items-sm-end text-center text-sm-start gap-2 mb-4">
               <div>
                 <span className="text-danger small text-uppercase fw-bold tracking-wider">Festividades</span>
                 <h2 className="h3 fw-bold mb-0" style={{ color: '#0f172a' }}>Explora por Festividad</h2>
@@ -227,7 +227,7 @@ export default function Home() {
       {/* PRODUCTOS DESTACADOS */}
       <section className="py-5 bg-white border-top border-bottom">
         <Container>
-          <div className="d-flex justify-content-between align-items-end mb-4">
+          <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center align-items-sm-end text-center text-sm-start gap-2 mb-4">
             <div>
               <span className="text-danger small text-uppercase fw-bold tracking-wider">Destacados</span>
               <h2 className="h3 fw-bold mb-0" style={{ color: '#0f172a' }}>Artículos Más Vendidos</h2>
@@ -422,7 +422,7 @@ export default function Home() {
       {/* BANNER CTA FINAL */}
       <section className="py-5">
         <Container>
-          <div className="p-5 rounded-4 text-center position-relative overflow-hidden bg-white border shadow-sm">
+          <div className="p-4 p-sm-5 rounded-4 text-center position-relative overflow-hidden bg-white border shadow-sm mx-auto" style={{ maxWidth: '820px' }}>
             <div className="p-3 rounded-circle d-inline-flex mb-3 shadow-sm border" style={{ backgroundColor: '#fff1f2', color: '#e11d48' }}>
               <FaBirthdayCake size={36} />
             </div>
@@ -430,11 +430,11 @@ export default function Home() {
             <p className="text-secondary mx-auto mb-4" style={{ maxWidth: '620px', fontSize: '1.05rem' }}>
               Encontrá los combos de cotillón, globos temáticos, bengalas y vajilla descartable en un solo lugar con despacho inmediato.
             </p>
-            <div className="d-flex justify-content-center gap-3">
-              <Button as={Link} to="/catalogo" className="btn-festive px-4 py-2">
+            <div className="d-flex flex-column flex-sm-row justify-content-center align-items-stretch align-items-sm-center gap-2 gap-sm-3 mx-auto" style={{ maxWidth: '440px' }}>
+              <Button as={Link} to="/catalogo" className="btn-festive px-4 py-2.5 w-100 w-sm-auto text-center justify-content-center">
                 Ver Catálogo de Artículos
               </Button>
-              <Button as={Link} to="/como-comprar" className="btn-festive-outline px-4 py-2">
+              <Button as={Link} to="/como-comprar" className="btn-festive-outline px-4 py-2.5 w-100 w-sm-auto text-center justify-content-center">
                 Guía Paso a Paso
               </Button>
             </div>

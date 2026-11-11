@@ -426,7 +426,7 @@ export default function Checkout() {
           </Alert>
         )}
 
-        <Row className="g-5">
+        <Row className="g-4 g-lg-5">
           {/* Formulario de Checkout */}
           <Col lg={7}>
             <div

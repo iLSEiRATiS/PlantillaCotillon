@@ -20,61 +20,78 @@ export default function Footer() {
   return (
     <footer className="app-footer mt-auto">
       <Container>
-        {/* Franja de Confianza y Beneficios */}
-        <div className="row g-2 g-sm-3 mb-4 mb-lg-5">
-          <div className="col-6 col-lg-3">
-            <div className="footer-trust-badge">
-              <FaTruck size={22} className="text-danger flex-shrink-0" />
-              <div>
-                <div className="text-white fw-bold">Envíos a Todo el País</div>
-                <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Expresos y transporte seguro</div>
+        {/* ===================================================
+            FRANJA DE CONFIANZA Y BENEFICIOS
+            Simétrica, equilibrada y con alturas idénticas
+            =================================================== */}
+        <div className="row g-2 g-sm-3 mb-4 mb-lg-5 justify-content-center">
+          <div className="col-6 col-lg-3 d-flex">
+            <div className="footer-trust-badge w-100 h-100">
+              <div className="footer-trust-icon-box">
+                <FaTruck size={22} className="text-danger flex-shrink-0" />
+              </div>
+              <div className="footer-trust-text">
+                <div className="text-white fw-bold footer-trust-title">Envíos a Todo el País</div>
+                <div className="footer-trust-sub">Expresos y transporte seguro</div>
               </div>
             </div>
           </div>
-          <div className="col-6 col-lg-3">
-            <div className="footer-trust-badge">
-              <FaStore size={22} className="text-warning flex-shrink-0" />
-              <div>
-                <div className="text-white fw-bold">Retiro en Depósito</div>
-                <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Sin costo de despacho</div>
+
+          <div className="col-6 col-lg-3 d-flex">
+            <div className="footer-trust-badge w-100 h-100">
+              <div className="footer-trust-icon-box">
+                <FaStore size={22} className="text-warning flex-shrink-0" />
+              </div>
+              <div className="footer-trust-text">
+                <div className="text-white fw-bold footer-trust-title">Retiro en Depósito</div>
+                <div className="footer-trust-sub">Sin costo de despacho</div>
               </div>
             </div>
           </div>
-          <div className="col-6 col-lg-3">
-            <div className="footer-trust-badge">
-              <FaFileInvoiceDollar size={22} className="text-info flex-shrink-0" />
-              <div>
-                <div className="text-white fw-bold">Facturación A y B</div>
-                <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Para eventos y empresas</div>
+
+          <div className="col-6 col-lg-3 d-flex">
+            <div className="footer-trust-badge w-100 h-100">
+              <div className="footer-trust-icon-box">
+                <FaFileInvoiceDollar size={22} className="text-info flex-shrink-0" />
+              </div>
+              <div className="footer-trust-text">
+                <div className="text-white fw-bold footer-trust-title">Facturación A y B</div>
+                <div className="footer-trust-sub">Para eventos y empresas</div>
               </div>
             </div>
           </div>
-          <div className="col-6 col-lg-3">
-            <div className="footer-trust-badge">
-              <FaShieldAlt size={22} className="text-success flex-shrink-0" />
-              <div>
-                <div className="text-white fw-bold">Compra Garantizada</div>
-                <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Artículos de primera calidad</div>
+
+          <div className="col-6 col-lg-3 d-flex">
+            <div className="footer-trust-badge w-100 h-100">
+              <div className="footer-trust-icon-box">
+                <FaShieldAlt size={22} className="text-success flex-shrink-0" />
+              </div>
+              <div className="footer-trust-text">
+                <div className="text-white fw-bold footer-trust-title">Compra Garantizada</div>
+                <div className="footer-trust-sub">Artículos de primera calidad</div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Columnas Principales */}
+        {/* ===================================================
+            COLUMNAS PRINCIPALES DEL FOOTER
+            En móvil: Marca centrada, Enlaces en 2 columnas simétricas, Contactos centrados
+            =================================================== */}
         <Row className="gy-4 gx-lg-5 justify-content-between">
-          {/* Columna 1: Marca y Redes */}
-          <Col lg={4} md={6}>
+          {/* Columna 1: Marca y Redes Sociales */}
+          <Col lg={4} md={12} className="text-center text-lg-start mb-2 mb-lg-0">
             <div className="mb-3">
               <Link to="/" className="d-inline-block mb-3">
-                <img src={logoLight} alt="CotiFiesta" style={{ height: '46px', width: 'auto' }} />
+                <img src={logoLight} alt="CotiFiesta" style={{ height: '44px', width: 'auto' }} />
               </Link>
-              <p style={{ color: '#cbd5e1', fontSize: '0.94rem', lineHeight: '1.6', maxWidth: '360px' }}>
+              <p className="mx-auto mx-lg-0" style={{ color: '#cbd5e1', fontSize: '0.92rem', lineHeight: '1.6', maxWidth: '380px' }}>
                 Tu tienda de cotillón, ambientación y repostería festiva. Encontrá todo lo necesario
                 para cumpleaños, bodas, aniversarios y eventos temáticos con venta mayorista y minorista.
               </p>
             </div>
 
-            <div className="d-flex gap-2 pt-2">
+            <div className="d-flex justify-content-center justify-content-lg-start gap-2 pt-1">
               <a
                 href="https://instagram.com"
                 target="_blank"
@@ -112,9 +129,9 @@ export default function Footer() {
             </div>
           </Col>
 
-          {/* Columna 2: Navegación Rápida */}
-          <Col lg={2} sm={6}>
-            <h6 className="fw-bold mb-3 text-uppercase" style={{ fontSize: '0.85rem', letterSpacing: '0.08em', color: '#ffffff' }}>
+          {/* Columna 2: Navegación Rápida (50% en móvil, 2 cols en desktop) */}
+          <Col xs={6} sm={6} lg={2} className="text-start">
+            <h6 className="fw-bold mb-3 text-uppercase footer-col-heading">
               Navegación
             </h6>
             <ul className="list-unstyled d-flex flex-column gap-2 mb-0">
@@ -122,122 +139,127 @@ export default function Footer() {
                 <Link to="/" className="footer-link">Inicio</Link>
               </li>
               <li>
-                <Link to="/catalogo" className="footer-link">Catálogo Completo</Link>
+                <Link to="/catalogo" className="footer-link">Catálogo</Link>
               </li>
               <li>
                 <Link to="/como-comprar" className="footer-link">¿Cómo Comprar?</Link>
               </li>
               <li>
-                <Link to="/pedidos" className="footer-link">Seguimiento de Pedidos</Link>
+                <Link to="/pedidos" className="footer-link">Mis Pedidos</Link>
               </li>
               <li>
-                <Link to="/login" className="footer-link">Acceso Clientes / Admin</Link>
+                <Link to="/login" className="footer-link">Acceso Clientes</Link>
               </li>
             </ul>
           </Col>
 
-          {/* Columna 3: Festividades & Eventos */}
-          <Col lg={3} sm={6}>
-            <h6 className="fw-bold mb-3 text-uppercase" style={{ fontSize: '0.85rem', letterSpacing: '0.08em', color: '#ffffff' }}>
+          {/* Columna 3: Festividades & Rubros (50% en móvil, 3 cols en desktop) */}
+          <Col xs={6} sm={6} lg={3} className="text-start">
+            <h6 className="fw-bold mb-3 text-uppercase footer-col-heading">
               Rubros Festivos
             </h6>
             <ul className="list-unstyled d-flex flex-column gap-2 mb-0">
               <li>
                 <Link to="/catalogo?cat=halloween" className="footer-link">
-                  Halloween & Noche de Brujas
+                  Halloween
                 </Link>
               </li>
               <li>
                 <Link to="/catalogo?cat=navidad" className="footer-link">
-                  Navidad & Fin de Año
+                  Navidad &amp; Fin de Año
                 </Link>
               </li>
               <li>
                 <Link to="/catalogo?cat=egresados" className="footer-link">
-                  Egresados & Graduaciones
+                  Egresados
                 </Link>
               </li>
               <li>
                 <Link to="/catalogo?cat=comuniones" className="footer-link">
-                  Comuniones & Bautismos
+                  Comuniones
                 </Link>
               </li>
               <li>
                 <Link to="/catalogo?cat=san-patricio" className="footer-link">
-                  San Patricio & Temáticas
+                  San Patricio
                 </Link>
               </li>
               <li>
                 <Link to="/catalogo?cat=cumpleanos" className="footer-link">
-                  Cumpleaños & Aniversarios
+                  Cumpleaños
                 </Link>
               </li>
               <li>
                 <Link to="/catalogo?cat=carnaval-carioca" className="footer-link">
-                  Carnaval Carioca & Despedidas
+                  Carnaval Carioca
                 </Link>
               </li>
             </ul>
           </Col>
 
           {/* Columna 4: Contacto & Retiro */}
-          <Col lg={3} md={6}>
-            <h6 className="fw-bold mb-3 text-uppercase" style={{ fontSize: '0.85rem', letterSpacing: '0.08em', color: '#ffffff' }}>
-              Atención & Retiros
-            </h6>
-            <div className="d-flex flex-column gap-3">
-              <div className="footer-contact-item">
-                <FaMapMarkerAlt size={18} className="text-warning flex-shrink-0 mt-1" />
-                <span>
-                  <strong>Depósito Central:</strong><br />
-                  Av. Corrientes 3450, Almagro, CABA
-                </span>
-              </div>
+          <Col xs={12} sm={12} lg={3} className="mt-4 mt-lg-0">
+            <div className="footer-contact-box mx-auto mx-lg-0">
+              <h6 className="fw-bold mb-3 text-uppercase footer-col-heading text-center text-lg-start">
+                Atención &amp; Retiros
+              </h6>
+              <div className="d-flex flex-column gap-3">
+                <div className="footer-contact-item">
+                  <FaMapMarkerAlt size={18} className="text-warning flex-shrink-0 mt-1" />
+                  <span>
+                    <strong>Depósito Central:</strong><br />
+                    Av. Corrientes 3450, Almagro, CABA
+                  </span>
+                </div>
 
-              <div className="footer-contact-item">
-                <FaClock size={16} className="text-info flex-shrink-0 mt-1" />
-                <span>
-                  <strong>Horario de Atención:</strong><br />
-                  Lunes a Viernes 09:00 a 19:00 hs<br />
-                  Sábados 09:30 a 14:00 hs
-                </span>
-              </div>
+                <div className="footer-contact-item">
+                  <FaClock size={16} className="text-info flex-shrink-0 mt-1" />
+                  <span>
+                    <strong>Horario de Atención:</strong><br />
+                    Lunes a Viernes 09:00 a 19:00 hs<br />
+                    Sábados 09:30 a 14:00 hs
+                  </span>
+                </div>
 
-              <div className="footer-contact-item">
-                <FaWhatsapp size={18} className="text-success flex-shrink-0 mt-1" />
-                <span>
-                  <strong>Ventas & WhatsApp:</strong><br />
-                  <a href="https://wa.me/5491155550000" target="_blank" rel="noreferrer">
-                    +54 9 11 5555-0000
-                  </a>
-                </span>
-              </div>
+                <div className="footer-contact-item">
+                  <FaWhatsapp size={18} className="text-success flex-shrink-0 mt-1" />
+                  <span>
+                    <strong>Ventas &amp; WhatsApp:</strong><br />
+                    <a href="https://wa.me/5491155550000" target="_blank" rel="noreferrer">
+                      +54 9 11 5555-0000
+                    </a>
+                  </span>
+                </div>
 
-              <div className="footer-contact-item">
-                <FaEnvelope size={16} className="text-danger flex-shrink-0 mt-1" />
-                <span>
-                  <strong>Email Comercial:</strong><br />
-                  <a href="mailto:ventas@cotifiesta.com">
-                    ventas@cotifiesta.com
-                  </a>
-                </span>
+                <div className="footer-contact-item">
+                  <FaEnvelope size={16} className="text-danger flex-shrink-0 mt-1" />
+                  <span>
+                    <strong>Email Comercial:</strong><br />
+                    <a href="mailto:ventas@cotifiesta.com">
+                      ventas@cotifiesta.com
+                    </a>
+                  </span>
+                </div>
               </div>
             </div>
           </Col>
         </Row>
 
-        {/* Barra Inferior de Copyright */}
-        <div className="footer-bottom-bar d-flex flex-wrap justify-content-between align-items-center gap-3">
+        {/* ===================================================
+            BARRA INFERIOR DE COPYRIGHT Y POLÍTICAS
+            Centrada en móvil, distribuida en desktop
+            =================================================== */}
+        <div className="footer-bottom-bar d-flex flex-column flex-md-row justify-content-between align-items-center text-center text-md-start gap-2 gap-md-3">
           <span>
             © {currentYear} <strong>CotiFiesta</strong>. Todos los derechos reservados.
           </span>
-          <span className="d-flex align-items-center gap-3">
+          <div className="d-flex flex-wrap justify-content-center align-items-center gap-2 gap-md-3">
             <span>Precios expresados en Pesos Argentinos (ARS)</span>
-            <span>•</span>
+            <span className="d-none d-sm-inline">•</span>
             <Link to="/como-comprar" className="text-secondary text-decoration-none hover-white">
-              Términos & Políticas de Envíos
+              Términos &amp; Políticas de Envíos
             </Link>
-          </span>
+          </div>
         </div>
       </Container>
     </footer>

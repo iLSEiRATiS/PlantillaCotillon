@@ -405,30 +405,31 @@ export default function Catalogo() {
           {/* SECCIÓN PRINCIPAL DE PRODUCTOS (COL DERECHA / MÓVIL) */}
           <Col lg={9} md={8}>
             {/* Barra superior de controles (Filtros Móvil + Ordenamiento + Vistas) */}
-            <div className="ml-controls-bar flex-wrap gap-2 mb-3">
-              <div className="d-flex align-items-center gap-2 flex-wrap">
+            <div className="ml-controls-bar d-flex align-items-center justify-content-between mb-3 gap-2">
+              <div className="d-flex align-items-center gap-2 min-w-0">
                 {/* Botón Filtros en Pantallas Móviles (< 768px) */}
                 <Button
                   variant="outline-dark"
                   size="sm"
-                  className="d-md-none d-flex align-items-center gap-2 py-1 px-3 border bg-white"
+                  className="d-md-none d-flex align-items-center gap-1.5 py-1 px-2.5 border bg-white flex-shrink-0"
                   onClick={() => setShowMobileFilters(true)}
                   aria-label="Abrir filtros"
                 >
                   <FaSlidersH size={12} className="text-primary" />
-                  <span className="fw-semibold">Filtros</span>
-                  <span className="badge bg-dark rounded-pill" style={{ fontSize: '0.7rem' }}>
+                  <span className="fw-semibold small">Filtros</span>
+                  <span className="badge bg-dark rounded-pill" style={{ fontSize: '0.68rem' }}>
                     {filteredProducts.length}
                   </span>
                 </Button>
 
-                <div className="d-flex align-items-center gap-2">
-                  <span className="small text-secondary d-none d-sm-inline">Ordenar por</span>
+                <div className="d-flex align-items-center gap-1 min-w-0">
+                  <span className="small text-secondary d-none d-sm-inline text-nowrap">Ordenar por:</span>
                   <select
-                    className="ml-sort-select"
+                    className="ml-sort-select text-truncate"
                     value={currentSort}
                     onChange={handleSortChange}
                     aria-label="Ordenar productos"
+                    style={{ maxWidth: '145px' }}
                   >
                     <option value="">Más relevantes</option>
                     <option value="precio_asc">Menor precio</option>
@@ -439,7 +440,7 @@ export default function Catalogo() {
               </div>
 
               {/* Botones de Vista Cuadrícula / Lista */}
-              <div className="ml-view-toggle ms-auto">
+              <div className="ml-view-toggle ms-auto flex-shrink-0">
                 <button
                   type="button"
                   className={`ml-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
@@ -447,7 +448,7 @@ export default function Catalogo() {
                   title="Vista en cuadrícula"
                   aria-label="Vista en cuadrícula"
                 >
-                  <FaThLarge size={14} />
+                  <FaThLarge size={13} />
                 </button>
                 <button
                   type="button"
@@ -456,7 +457,7 @@ export default function Catalogo() {
                   title="Vista en lista"
                   aria-label="Vista en lista"
                 >
-                  <FaList size={14} />
+                  <FaList size={13} />
                 </button>
               </div>
             </div>

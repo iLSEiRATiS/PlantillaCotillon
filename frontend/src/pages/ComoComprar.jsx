@@ -70,11 +70,11 @@ export default function ComoComprar() {
         </div>
 
         {/* Pasos */}
-        <Row className="g-4 mb-5 pb-3">
+        <Row className="g-3 g-sm-4 mb-5 pb-3">
           {steps.map((st, i) => (
-            <Col lg={3} sm={6} key={i}>
-              <div className="step-card h-100 d-flex flex-column">
-                <div className="mb-4">
+            <Col lg={3} sm={6} xs={12} key={i}>
+              <div className="step-card h-100 d-flex flex-column text-center text-sm-start">
+                <div className="mb-3 mb-sm-4 mx-auto mx-sm-0">
                   <div
                     className="p-3 rounded-circle d-inline-flex align-items-center justify-content-center"
                     style={{ backgroundColor: st.bgIcon, width: 54, height: 54 }}
@@ -104,7 +104,7 @@ export default function ComoComprar() {
           <p className="small mb-4 mx-auto" style={{ maxWidth: '520px', color: '#334155', fontSize: '1rem' }}>
             Ingresa a nuestro catálogo, agrega tus artículos favoritos al carrito y confirma tu pedido con total seguridad.
           </p>
-          <Button as={Link} to="/catalogo" className="btn-festive px-4 py-2 fs-6">
+          <Button as={Link} to="/catalogo" className="btn-festive px-4 py-2.5 fs-6 w-100 w-sm-auto">
             Ver Catálogo de Artículos <FaArrowRight size={13} className="ms-2" />
           </Button>
         </div>
