@@ -11,7 +11,7 @@ const formatMoney = (val) =>
     maximumFractionDigits: 0,
   }).format(val || 0);
 
-export default function ProductCard({ product, layout = 'grid' }) {
+export default function ProductCard({ product, layout = 'grid', className = '' }) {
   const { addToCart } = useCart();
   const [added, setAdded] = useState(false);
 
@@ -41,7 +41,7 @@ export default function ProductCard({ product, layout = 'grid' }) {
 
   if (layout === 'list') {
     return (
-      <Link to={`/producto/${id}`} className="ml-card-list">
+      <Link to={`/producto/${id}`} className={`ml-card-list ${className}`}>
         <div className="ml-card-list-img">
           <img src={image} alt={name} loading="lazy" />
         </div>
@@ -53,7 +53,9 @@ export default function ProductCard({ product, layout = 'grid' }) {
           </p>
 
           <div className="d-flex align-items-center gap-2 mb-2">
-            <span className="badge bg-light text-secondary border">{categoryName}</span>
+            <span className="badge bg-light text-secondary border text-truncate" style={{ maxWidth: '140px' }}>
+              {categoryName}
+            </span>
             <div className="d-flex align-items-center text-warning small gap-1">
               <FaStar size={12} />
               <span className="text-dark fw-bold" style={{ fontSize: '0.8rem' }}>4.8</span>
@@ -84,7 +86,7 @@ export default function ProductCard({ product, layout = 'grid' }) {
             en {installments} cuotas de {formatMoney(installmentVal)} sin interés
           </div>
 
-          <div className="mt-3">
+          <div className="mt-3 w-100">
             <button
               type="button"
               className={`ml-btn-add ${added ? 'added' : ''}`}
@@ -108,7 +110,7 @@ export default function ProductCard({ product, layout = 'grid' }) {
 
   // Layout Grid (Default)
   return (
-    <Card as={Link} to={`/producto/${id}`} className="ml-card-grid">
+    <Card as={Link} to={`/producto/${id}`} className={`ml-card-grid ${className}`}>
       <div className="ml-card-img-container">
         <img src={image} alt={name} loading="lazy" />
       </div>
@@ -143,7 +145,7 @@ export default function ProductCard({ product, layout = 'grid' }) {
         </h4>
 
         <div className="d-flex align-items-center justify-content-between mb-2">
-          <span className="badge bg-light text-secondary border" style={{ fontSize: '0.7rem' }}>
+          <span className="badge bg-light text-secondary border text-truncate" style={{ fontSize: '0.7rem', maxWidth: '120px' }}>
             {categoryName}
           </span>
           <div className="d-flex align-items-center text-warning gap-1" style={{ fontSize: '0.75rem' }}>

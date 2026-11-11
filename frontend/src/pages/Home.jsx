@@ -112,13 +112,13 @@ export default function Home() {
       <section className="py-4 border-bottom bg-white">
         <Container>
           <Row className="gy-3 justify-content-center">
-            <Col md={4} sm={6}>
+            <Col md={4} sm={6} className="d-flex">
               <div
-                className="d-flex align-items-center gap-3 p-3 rounded-4 bg-white border"
+                className="d-flex align-items-center gap-3 p-3 rounded-4 bg-white border w-100 h-100"
                 style={{ borderColor: '#e2e8f0', transition: 'all 0.2s ease' }}
               >
                 <div
-                  className="p-3 rounded-circle d-flex align-items-center justify-content-center"
+                  className="p-3 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
                   style={{ backgroundColor: '#ffe4e6', color: '#e11d48', width: 50, height: 50 }}
                 >
                   <FaTruck size={20} />
@@ -130,13 +130,13 @@ export default function Home() {
               </div>
             </Col>
 
-            <Col md={4} sm={6}>
+            <Col md={4} sm={6} className="d-flex">
               <div
-                className="d-flex align-items-center gap-3 p-3 rounded-4 bg-white border"
+                className="d-flex align-items-center gap-3 p-3 rounded-4 bg-white border w-100 h-100"
                 style={{ borderColor: '#e2e8f0', transition: 'all 0.2s ease' }}
               >
                 <div
-                  className="p-3 rounded-circle d-flex align-items-center justify-content-center"
+                  className="p-3 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
                   style={{ backgroundColor: '#fef3c7', color: '#d97706', width: 50, height: 50 }}
                 >
                   <FaShieldAlt size={20} />
@@ -148,13 +148,13 @@ export default function Home() {
               </div>
             </Col>
 
-            <Col md={4} sm={6}>
+            <Col md={4} sm={6} className="d-flex">
               <div
-                className="d-flex align-items-center gap-3 p-3 rounded-4 bg-white border"
+                className="d-flex align-items-center gap-3 p-3 rounded-4 bg-white border w-100 h-100"
                 style={{ borderColor: '#e2e8f0', transition: 'all 0.2s ease' }}
               >
                 <div
-                  className="p-3 rounded-circle d-flex align-items-center justify-content-center"
+                  className="p-3 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
                   style={{ backgroundColor: '#e0e7ff', color: '#6366f1', width: 50, height: 50 }}
                 >
                   <FaHeadset size={20} />
@@ -185,10 +185,10 @@ export default function Home() {
 
             <Row className="g-3">
               {categories.slice(0, 6).map((cat) => (
-                <Col lg={4} md={6} sm={6} key={cat.id}>
+                <Col lg={4} md={6} sm={6} key={cat.id} className="d-flex">
                   <Link
                     to={`/catalogo?cat=${cat.slug}`}
-                    className="p-4 rounded-4 d-flex flex-column justify-content-between h-100 text-decoration-none bg-white border shadow-sm"
+                    className="p-4 rounded-4 d-flex flex-column justify-content-between h-100 w-100 text-decoration-none bg-white border shadow-sm"
                     style={{
                       borderColor: '#e2e8f0',
                       transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -245,8 +245,8 @@ export default function Home() {
           ) : (
             <Row className="g-2 g-sm-3 g-lg-4">
               {products.map((product) => (
-                <Col lg={3} md={4} sm={6} xs={6} key={product.id}>
-                  <ProductCard product={product} />
+                <Col lg={3} md={4} sm={6} xs={6} key={product.id} className="d-flex">
+                  <ProductCard product={product} className="w-100" />
                 </Col>
               ))}
             </Row>

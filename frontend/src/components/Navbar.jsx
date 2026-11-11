@@ -23,6 +23,7 @@ export default function AppNavbar() {
 
   const [showContact, setShowContact] = useState(false);
   const [navSearch, setNavSearch] = useState('');
+  const [navExpanded, setNavExpanded] = useState(false);
 
   const totalItems = getTotalItems();
   const isStaff = user?.is_staff || user?.is_superuser;
@@ -34,7 +35,10 @@ export default function AppNavbar() {
     } else {
       navigate('/catalogo');
     }
+    setNavExpanded(false);
   };
+
+  const closeNav = () => setNavExpanded(false);
 
   return (
     <>
@@ -46,21 +50,35 @@ export default function AppNavbar() {
         </span>
       </div>
 
-      <Navbar expand="lg" className="app-navbar py-2" variant="light">
-        <Container>
-          {/* Top Row en Mobile: Logo a la izquierda, Carrito + Menú a la derecha */}
-          <div className="d-flex align-items-center justify-content-between w-100 d-lg-contents">
+      <Navbar
+        expand="lg"
+        className="app-navbar py-2"
+        variant="light"
+        expanded={navExpanded}
+        onToggle={setNavExpanded}
+      >
+        <Container className="navbar-container-responsive">
+          {/* Fila Superior en Móvil: Logo a la izquierda, Carrito + Menú a la derecha */}
+          <div className="navbar-brand-row">
             {/* Logo */}
-            <Navbar.Brand as={Link} to="/" className="d-flex align-items-center me-2 me-lg-3 py-0">
+            <Navbar.Brand
+              as={Link}
+              to="/"
+              onClick={closeNav}
+              className="d-flex align-items-center me-0 me-lg-2 py-0"
+            >
               <img src={logo} alt="CotiFiesta" className="brand-logo-img" />
             </Navbar.Brand>
 
-            {/* Acciones Rápidas en Móvil (Visible solo en < 992px) */}
+            {/* Acciones Rápidas en Móvil (< 992px) */}
             <div className="d-flex align-items-center gap-2 d-lg-none">
               <Button
                 variant="link"
                 className="position-relative text-dark p-2 text-decoration-none d-flex align-items-center justify-content-center"
-                onClick={openCart}
+                onClick={() => {
+                  closeNav();
+                  openCart();
+                }}
                 aria-label="Abrir carrito de compras"
               >
                 <FaShoppingBag size={21} className="text-dark" />
@@ -85,10 +103,10 @@ export default function AppNavbar() {
             </div>
           </div>
 
-          {/* Buscador Interactivo: En móvil ocupa fila completa debajo; en desktop se centra */}
+          {/* Buscador Interactivo: En móvil ocupa fila completa; en desktop se centra en la misma fila */}
           <form
             onSubmit={handleNavSearch}
-            className="navbar-search-container flex-grow-1 w-100 w-lg-auto my-2 my-lg-0 mx-lg-3 order-3 order-lg-2"
+            className="navbar-search-container"
           >
             <div className="navbar-search-wrapper">
               <input
@@ -119,62 +137,81 @@ export default function AppNavbar() {
             </div>
           </form>
 
-          {/* Menú y Acciones de Usuario (Desktop & Mobile Drawer) */}
-          <Navbar.Collapse id="main-navbar-nav" className="order-4 order-lg-3">
-            <Nav className="me-auto my-2 my-lg-0 gap-1 pt-2 pt-lg-0 border-top border-lg-0">
-              <Nav.Link as={NavLink} to="/" className="nav-link-custom">
+          {/* Menú y Acciones de Usuario (Desktop en fila horizontal, Móvil desplegable) */}
+          <Navbar.Collapse id="main-navbar-nav" className="navbar-nav-collapse">
+            <Nav className="navbar-nav-links gap-1 pt-2 pt-lg-0 border-top border-lg-0">
+              <Nav.Link as={NavLink} to="/" onClick={closeNav} className="nav-link-custom">
                 Inicio
               </Nav.Link>
-              <Nav.Link as={NavLink} to="/catalogo" className="nav-link-custom">
+              <Nav.Link as={NavLink} to="/catalogo" onClick={closeNav} className="nav-link-custom">
                 Catálogo
               </Nav.Link>
-              <Nav.Link as={NavLink} to="/como-comprar" className="nav-link-custom">
+              <Nav.Link as={NavLink} to="/como-comprar" onClick={closeNav} className="nav-link-custom">
                 ¿Cómo Comprar?
               </Nav.Link>
               <Nav.Link
                 as="button"
-                onClick={() => setShowContact(true)}
+                onClick={() => {
+                  closeNav();
+                  setShowContact(true);
+                }}
                 className="nav-link-custom bg-transparent border-0 text-start"
               >
                 Contacto
               </Nav.Link>
               {isStaff && (
-                <Nav.Link as={NavLink} to="/admin" className="nav-link-custom text-primary fw-bold">
+                <Nav.Link as={NavLink} to="/admin" onClick={closeNav} className="nav-link-custom text-primary fw-bold d-lg-none">
                   Panel Admin
                 </Nav.Link>
               )}
             </Nav>
 
-            <div className="d-flex align-items-center gap-2 pt-3 pt-lg-0 border-top border-lg-0">
+            <div className="navbar-auth-actions gap-2 pt-3 pt-lg-0 border-top border-lg-0">
               {isLoggedIn ? (
-                <div className="d-flex flex-wrap align-items-center gap-2 w-100 w-lg-auto">
+                <div className="d-flex flex-wrap align-items-center gap-2">
                   {isStaff && (
-                    <Link to="/admin" className="btn-admin-nav text-decoration-none py-2 px-3 small">
+                    <Link
+                      to="/admin"
+                      onClick={closeNav}
+                      className="btn-admin-nav text-decoration-none py-1.5 px-3 small d-none d-lg-inline-flex"
+                    >
                       <FaCrown size={12} /> Admin
                     </Link>
                   )}
                   <Link
                     to="/pedidos"
-                    className="btn-monochrome-dark d-flex align-items-center gap-2 text-decoration-none py-2 px-3"
+                    onClick={closeNav}
+                    className="btn-monochrome-dark d-flex align-items-center gap-2 text-decoration-none py-1.5 px-3"
                   >
-                    <FaUser size={13} />
+                    <FaUser size={12} />
                     <span className="small">{user?.username || 'Mi Cuenta'}</span>
                   </Link>
                   <Button
                     variant="link"
-                    className="text-muted p-2 text-decoration-none hover-primary ms-auto ms-lg-0"
-                    onClick={logout}
+                    className="text-muted p-1 text-decoration-none hover-primary ms-auto ms-lg-0"
+                    onClick={() => {
+                      closeNav();
+                      logout();
+                    }}
                     title="Cerrar sesión"
                   >
                     <FaSignOutAlt size={16} />
                   </Button>
                 </div>
               ) : (
-                <div className="d-flex align-items-center gap-2 w-100 w-lg-auto">
-                  <Link to="/login" className="btn-monochrome-outline text-decoration-none py-2 px-3 small flex-grow-1 flex-lg-grow-0 text-center">
+                <div className="d-flex align-items-center gap-2 w-100">
+                  <Link
+                    to="/login"
+                    onClick={closeNav}
+                    className="btn-monochrome-outline text-decoration-none py-1.5 px-3 small text-center flex-grow-1 flex-lg-grow-0"
+                  >
                     Ingresar
                   </Link>
-                  <Link to="/registro" className="btn-festive text-decoration-none py-2 px-3 small flex-grow-1 flex-lg-grow-0 text-center">
+                  <Link
+                    to="/registro"
+                    onClick={closeNav}
+                    className="btn-festive text-decoration-none py-1.5 px-3 small text-center flex-grow-1 flex-lg-grow-0"
+                  >
                     Registro
                   </Link>
                 </div>
@@ -183,7 +220,7 @@ export default function AppNavbar() {
               {/* Botón Carrito en Desktop (Oculto en móvil porque ya está arriba) */}
               <Button
                 variant="link"
-                className="position-relative text-dark p-2 ms-2 text-decoration-none d-none d-lg-flex align-items-center justify-content-center"
+                className="position-relative text-dark p-2 ms-1 text-decoration-none d-none d-lg-flex align-items-center justify-content-center flex-shrink-0"
                 onClick={openCart}
                 aria-label="Abrir carrito"
               >

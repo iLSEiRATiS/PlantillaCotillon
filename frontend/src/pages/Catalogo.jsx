@@ -130,103 +130,15 @@ export default function Catalogo() {
     currentPage * itemsPerPage
   );
 
-  // Renderizador de filtros para Desktop y Móvil (Offcanvas)
+  const hasActiveFilters = Boolean(
+    currentCategory || currentSearch || currentMinPrice || currentMaxPrice || currentInstallments
+  );
+
+  // Renderizador de filtros para Desktop (Sidebar) y Móvil (Offcanvas)
   const renderFilters = () => (
     <>
-      {/* Título de Categoría / Búsqueda activa */}
-      <div className="mb-3">
-        <h1 className="ml-query-title">
-          {activeCategoryObj
-            ? activeCategoryObj.nombre
-            : currentSearch
-            ? currentSearch
-            : 'Cotillón para Fiestas'}
-        </h1>
-        <div className="ml-results-count">
-          {filteredProducts.length} {filteredProducts.length === 1 ? 'resultado' : 'resultados'}
-        </div>
-      </div>
-
-      {/* Chips de Filtros Aplicados */}
-      {(currentCategory || currentSearch || currentMinPrice || currentMaxPrice || currentInstallments) && (
-        <div className="ml-filter-group pt-2">
-          <div className="d-flex align-items-center justify-content-between mb-2">
-            <span className="small text-secondary fw-bold text-uppercase">Filtros aplicados</span>
-            <button
-              type="button"
-              className="btn btn-link p-0 small text-danger text-decoration-none"
-              onClick={clearAllFilters}
-              style={{ fontSize: '0.8rem' }}
-            >
-              Borrar todos
-            </button>
-          </div>
-          <div className="ml-chips-container">
-            {activeCategoryObj && (
-              <span className="ml-chip">
-                {activeCategoryObj.nombre}
-                <button
-                  type="button"
-                  className="ml-chip-btn"
-                  onClick={() => updateParams({ cat: '' })}
-                  title="Quitar categoría"
-                >
-                  <FaTimes size={10} />
-                </button>
-              </span>
-            )}
-
-            {currentSearch && (
-              <span className="ml-chip">
-                "{currentSearch}"
-                <button
-                  type="button"
-                  className="ml-chip-btn"
-                  onClick={() => updateParams({ q: '' })}
-                  title="Quitar búsqueda"
-                >
-                  <FaTimes size={10} />
-                </button>
-              </span>
-            )}
-
-            {(currentMinPrice || currentMaxPrice) && (
-              <span className="ml-chip">
-                ${currentMinPrice || '0'} - ${currentMaxPrice || '∞'}
-                <button
-                  type="button"
-                  className="ml-chip-btn"
-                  onClick={() => {
-                    setMinInput('');
-                    setMaxInput('');
-                    updateParams({ min_price: '', max_price: '' });
-                  }}
-                  title="Quitar rango de precio"
-                >
-                  <FaTimes size={10} />
-                </button>
-              </span>
-            )}
-
-            {currentInstallments && (
-              <span className="ml-chip">
-                Cuotas sin interés
-                <button
-                  type="button"
-                  className="ml-chip-btn"
-                  onClick={() => updateParams({ installments: '' })}
-                  title="Quitar cuotas sin interés"
-                >
-                  <FaTimes size={10} />
-                </button>
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Grupo 1: Categorías / Festividades */}
-      <div className="ml-filter-group">
+      <div className="ml-filter-group pt-0">
         <h3 className="ml-filter-heading">Festividades &amp; Temáticas</h3>
         <ul className="ml-filter-list">
           <li className="ml-filter-item">
@@ -356,47 +268,150 @@ export default function Catalogo() {
   return (
     <div className="ml-catalog-page">
       <Container>
-        {/* Breadcrumb estilo Mercado Libre */}
-        <nav aria-label="breadcrumb" className="ml-breadcrumb">
-          <Link to="/">Inicio</Link>
-          <span className="ml-breadcrumb-divider">&gt;</span>
-          <Link to="/catalogo">Cotillón &amp; Fiestas</Link>
-          {activeCategoryObj && (
-            <>
-              <span className="ml-breadcrumb-divider">&gt;</span>
-              <span className="text-truncate" style={{ maxWidth: '200px' }}>{activeCategoryObj.nombre}</span>
-            </>
-          )}
-          {currentSearch && (
-            <>
-              <span className="ml-breadcrumb-divider">&gt;</span>
-              <span className="text-dark fw-semibold text-truncate" style={{ maxWidth: '200px' }}>
-                "{currentSearch}"
-              </span>
-            </>
-          )}
-        </nav>
+        {/* ===================================================
+            HEADER DEL CATÁLOGO (Visible en Desktop y Móvil)
+            Breadcrumb + Título H1 + Contador + Chips de Filtros
+            =================================================== */}
+        <div className="ml-catalog-header mb-3">
+          {/* Breadcrumb estilo Mercado Libre */}
+          <nav aria-label="breadcrumb" className="ml-breadcrumb mb-2">
+            <Link to="/">Inicio</Link>
+            <span className="ml-breadcrumb-divider">&gt;</span>
+            <Link to="/catalogo">Cotillón &amp; Fiestas</Link>
+            {activeCategoryObj && (
+              <>
+                <span className="ml-breadcrumb-divider">&gt;</span>
+                <span className="text-truncate" style={{ maxWidth: '240px' }}>
+                  {activeCategoryObj.nombre}
+                </span>
+              </>
+            )}
+            {currentSearch && (
+              <>
+                <span className="ml-breadcrumb-divider">&gt;</span>
+                <span className="text-dark fw-semibold text-truncate" style={{ maxWidth: '240px' }}>
+                  "{currentSearch}"
+                </span>
+              </>
+            )}
+          </nav>
 
-        <Row>
-          {/* ===================================================
-              SIDEBAR DE FILTROS EN DESKTOP (>= 768px)
-              =================================================== */}
+          {/* Título Principal y Cantidad de Resultados */}
+          <div className="d-flex align-items-baseline justify-content-between flex-wrap gap-2 mb-2">
+            <div>
+              <h1 className="ml-query-title mb-0">
+                {activeCategoryObj
+                  ? activeCategoryObj.nombre
+                  : currentSearch
+                  ? `Resultados para "${currentSearch}"`
+                  : 'Cotillón para Fiestas'}
+              </h1>
+              <div className="ml-results-count mt-1">
+                {filteredProducts.length} {filteredProducts.length === 1 ? 'publicación' : 'publicaciones'}
+              </div>
+            </div>
+          </div>
+
+          {/* Chips de Filtros Aplicados */}
+          {hasActiveFilters && (
+            <div className="ml-chips-wrapper pt-1 pb-2">
+              <div className="d-flex align-items-center gap-2 flex-wrap">
+                <span className="small text-secondary fw-bold text-uppercase me-1" style={{ fontSize: '0.75rem' }}>
+                  Filtros:
+                </span>
+
+                {activeCategoryObj && (
+                  <span className="ml-chip">
+                    {activeCategoryObj.nombre}
+                    <button
+                      type="button"
+                      className="ml-chip-btn"
+                      onClick={() => updateParams({ cat: '' })}
+                      title="Quitar categoría"
+                    >
+                      <FaTimes size={10} />
+                    </button>
+                  </span>
+                )}
+
+                {currentSearch && (
+                  <span className="ml-chip">
+                    "{currentSearch}"
+                    <button
+                      type="button"
+                      className="ml-chip-btn"
+                      onClick={() => updateParams({ q: '' })}
+                      title="Quitar búsqueda"
+                    >
+                      <FaTimes size={10} />
+                    </button>
+                  </span>
+                )}
+
+                {(currentMinPrice || currentMaxPrice) && (
+                  <span className="ml-chip">
+                    ${currentMinPrice || '0'} - ${currentMaxPrice || '∞'}
+                    <button
+                      type="button"
+                      className="ml-chip-btn"
+                      onClick={() => {
+                        setMinInput('');
+                        setMaxInput('');
+                        updateParams({ min_price: '', max_price: '' });
+                      }}
+                      title="Quitar rango de precio"
+                    >
+                      <FaTimes size={10} />
+                    </button>
+                  </span>
+                )}
+
+                {currentInstallments && (
+                  <span className="ml-chip">
+                    Cuotas sin interés
+                    <button
+                      type="button"
+                      className="ml-chip-btn"
+                      onClick={() => updateParams({ installments: '' })}
+                      title="Quitar cuotas sin interés"
+                    >
+                      <FaTimes size={10} />
+                    </button>
+                  </span>
+                )}
+
+                <button
+                  type="button"
+                  className="btn btn-link p-0 small text-danger text-decoration-none ms-1"
+                  onClick={clearAllFilters}
+                  style={{ fontSize: '0.8rem' }}
+                >
+                  Borrar todos
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ===================================================
+            GRILLA PRINCIPAL DE DOS COLUMNAS
+            =================================================== */}
+        <Row className="gx-3 gx-lg-4">
+          {/* SIDEBAR DE FILTROS EN DESKTOP (>= 768px) */}
           <Col lg={3} md={4} className="ml-sidebar d-none d-md-block mb-4 mb-md-0">
             {renderFilters()}
           </Col>
 
-          {/* ===================================================
-              SECCIÓN PRINCIPAL DE PRODUCTOS (COL DERECHA / MÓVIL)
-              =================================================== */}
+          {/* SECCIÓN PRINCIPAL DE PRODUCTOS (COL DERECHA / MÓVIL) */}
           <Col lg={9} md={8}>
             {/* Barra superior de controles (Filtros Móvil + Ordenamiento + Vistas) */}
-            <div className="ml-controls-bar flex-wrap gap-2">
+            <div className="ml-controls-bar flex-wrap gap-2 mb-3">
               <div className="d-flex align-items-center gap-2 flex-wrap">
                 {/* Botón Filtros en Pantallas Móviles (< 768px) */}
                 <Button
                   variant="outline-dark"
                   size="sm"
-                  className="d-md-none d-flex align-items-center gap-2 py-1 px-3 border"
+                  className="d-md-none d-flex align-items-center gap-2 py-1 px-3 border bg-white"
                   onClick={() => setShowMobileFilters(true)}
                   aria-label="Abrir filtros"
                 >
@@ -449,18 +464,18 @@ export default function Catalogo() {
             {/* Renderizado de Artículos */}
             {loading ? (
               <div className="text-center py-5 my-5 bg-white rounded border">
-                <Spinner animation="border" variant="primary" />
+                <Spinner animation="border" variant="danger" />
                 <p className="text-secondary small mt-3 mb-0">Cargando publicaciones de cotillón...</p>
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="text-center py-5 bg-white rounded border p-4 shadow-sm">
                 <div
                   className="p-3 rounded-circle d-inline-flex mb-3"
-                  style={{ backgroundColor: '#f5f5f5', color: '#999' }}
+                  style={{ backgroundColor: '#f8fafc', color: '#94a3b8' }}
                 >
                   <FaSearch size={32} />
                 </div>
-                <h4 className="fw-semibold mb-2" style={{ color: '#333' }}>
+                <h4 className="fw-semibold mb-2" style={{ color: '#0f172a' }}>
                   No hay publicaciones que coincidan con tu búsqueda
                 </h4>
                 <ul className="list-unstyled text-secondary small mb-4" style={{ lineHeight: '1.8' }}>
@@ -470,8 +485,7 @@ export default function Catalogo() {
                 </ul>
                 <button
                   type="button"
-                  className="btn btn-primary px-4 py-2"
-                  style={{ backgroundColor: '#3483fa', borderColor: '#3483fa' }}
+                  className="btn btn-festive px-4 py-2"
                   onClick={clearAllFilters}
                 >
                   Ver todos los productos de Cotillón
@@ -481,14 +495,14 @@ export default function Catalogo() {
               /* MODO CUADRÍCULA (GRID) - 2 columnas en mobile (xs={6}) y 3 en desktop */
               <Row className="g-2 g-sm-3">
                 {paginatedProducts.map((product) => (
-                  <Col xl={4} lg={4} md={6} sm={6} xs={6} key={product.id}>
-                    <ProductCard product={product} layout="grid" />
+                  <Col xl={4} lg={4} md={6} sm={6} xs={6} key={product.id} className="d-flex">
+                    <ProductCard product={product} layout="grid" className="w-100" />
                   </Col>
                 ))}
               </Row>
             ) : (
               /* MODO LISTA (HORIZONTAL) */
-              <div className="d-flex flex-column">
+              <div className="d-flex flex-column gap-2">
                 {paginatedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} layout="list" />
                 ))}
@@ -539,7 +553,7 @@ export default function Catalogo() {
         show={showMobileFilters}
         onHide={() => setShowMobileFilters(false)}
         placement="start"
-        className="d-md-none"
+        className="d-md-none custom-offcanvas-filters"
         style={{ maxWidth: '320px', width: '85vw' }}
       >
         <Offcanvas.Header closeButton className="border-bottom">
@@ -547,17 +561,16 @@ export default function Catalogo() {
             <FaFilter className="text-primary" size={16} /> Filtros de Cotillón
           </Offcanvas.Title>
         </Offcanvas.Header>
-        <Offcanvas.Body className="p-3">
-          <div className="ml-sidebar p-0">
+        <Offcanvas.Body className="p-3 d-flex flex-column">
+          <div className="ml-sidebar p-0 flex-grow-1">
             {renderFilters()}
           </div>
-          <div className="pt-3 border-top mt-3">
+          <div className="pt-3 border-top mt-3 sticky-bottom bg-white">
             <Button
-              className="btn btn-primary w-100 py-2 fw-semibold"
-              style={{ backgroundColor: '#3483fa', borderColor: '#3483fa' }}
+              className="btn btn-festive w-100 py-2 fw-semibold"
               onClick={() => setShowMobileFilters(false)}
             >
-              Ver {filteredProducts.length} productos
+              Ver {filteredProducts.length} publicaciones
             </Button>
           </div>
         </Offcanvas.Body>

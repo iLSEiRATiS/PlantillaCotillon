@@ -105,6 +105,7 @@ body {
   display: flex;
   flex-direction: column;
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
 #root {
@@ -1269,7 +1270,7 @@ a:hover {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 1050;
+  z-index: 1025;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -1378,22 +1379,134 @@ a:hover {
 
 /* =======================================================
    RESPONSIVE DESIGN SYSTEM - TODOS LOS DISPOSITIVOS
-   Móvil, Tablet, Laptop y Pantallas Grandes
+   Desktop PC (>=992px), Laptop (992-1199px), Tablet (768-991px), Móvil (<768px, <576px)
    ======================================================= */
 
-/* --- TABLETS & PANTALLAS MEDIANAS (< 992px) --- */
+/* --- ESCRITORIO / PC MODE (>= 992px) --- */
+@media (min-width: 992px) {
+  .navbar-container-responsive {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    gap: 0.75rem;
+  }
+
+  .navbar-brand-row {
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .navbar-search-container {
+    flex: 1 1 340px;
+    max-width: 400px;
+    margin: 0 0.5rem;
+  }
+
+  .navbar-nav-collapse {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+
+  .navbar-nav-links {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    margin-right: auto;
+    margin-left: 0.25rem;
+  }
+
+  .navbar-auth-actions {
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+  }
+
+  .nav-link-custom {
+    padding: 0.45rem 0.75rem !important;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+}
+
+/* --- LAPTOPS / PANTALLAS MEDIANAS-GRANDES (992px a 1199.98px) --- */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .brand-logo-img {
+    height: 38px;
+  }
+
+  .navbar-search-container {
+    max-width: 250px;
+    margin: 0 0.25rem;
+  }
+
+  .nav-link-custom {
+    padding: 0.4rem 0.5rem !important;
+    font-size: 0.84rem;
+  }
+
+  .navbar-container-responsive {
+    gap: 0.35rem;
+  }
+}
+
+/* --- TABLETS & DISPOSITIVOS MEDIANOS (< 992px) --- */
 @media (max-width: 991.98px) {
   .app-navbar {
     padding: 0.5rem 0;
   }
 
-  .navbar-search-container {
-    max-width: 100% !important;
-    margin: 0.4rem 0 0.2rem;
+  .navbar-container-responsive {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .navbar-brand-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
   }
 
   .brand-logo-img {
-    height: 40px;
+    height: 38px;
+  }
+
+  .navbar-search-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0.4rem 0 0.2rem 0 !important;
+  }
+
+  .navbar-nav-collapse {
+    width: 100% !important;
+    margin-top: 0.5rem;
+  }
+
+  .navbar-nav-links {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .nav-link-custom {
+    padding: 0.65rem 0.75rem !important;
+    font-size: 0.95rem;
+    border-radius: var(--r-md);
+  }
+
+  .navbar-auth-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    margin-top: 0.75rem;
   }
 
   .checkout-summary-box {
@@ -1444,6 +1557,10 @@ a:hover {
     font-size: 1.35rem;
   }
 
+  .ml-results-count {
+    font-size: 0.8125rem;
+  }
+
   /* Paginación más compacta */
   .ml-pagination-bar {
     gap: 0.25rem;
@@ -1455,6 +1572,38 @@ a:hover {
     height: 32px;
     padding: 0 0.5rem;
     font-size: 0.8125rem;
+  }
+
+  /* Mercado Libre Cards en Lista en Tablets y Móviles */
+  .ml-card-list {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.85rem;
+    gap: 0.75rem;
+  }
+
+  .ml-card-list-img {
+    width: 100%;
+    height: 140px;
+    min-width: auto;
+  }
+
+  .ml-card-list-pricing {
+    width: 100%;
+    min-width: auto;
+    text-align: left;
+    align-items: flex-start;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 0.65rem;
+    margin-top: 0.25rem;
+  }
+
+  .ml-card-list-pricing .ml-price-main-row {
+    justify-content: flex-start !important;
+  }
+
+  .ml-card-list-pricing .ml-btn-add {
+    width: 100%;
   }
 }
 
@@ -1552,38 +1701,6 @@ a:hover {
   .ml-btn-add {
     padding: 0.35rem 0.5rem;
     font-size: 0.75rem;
-  }
-
-  /* Mercado Libre Cards en Lista en Móviles */
-  .ml-card-list {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0.85rem;
-    gap: 0.75rem;
-  }
-
-  .ml-card-list-img {
-    width: 100%;
-    height: 130px;
-    min-width: auto;
-  }
-
-  .ml-card-list-pricing {
-    width: 100%;
-    min-width: auto;
-    text-align: left;
-    align-items: flex-start;
-    border-top: 1px solid #f0f0f0;
-    padding-top: 0.65rem;
-    margin-top: 0.25rem;
-  }
-
-  .ml-card-list-pricing .ml-price-main-row {
-    justify-content: flex-start !important;
-  }
-
-  .ml-card-list-pricing .ml-btn-add {
-    width: 100%;
   }
 
   /* Badges de Confianza del Footer en Móvil */
